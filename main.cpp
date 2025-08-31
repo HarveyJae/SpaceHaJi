@@ -30,6 +30,13 @@ int main(int, char const **)
         std::cout << "SDL_IMG Init failed: " << SDL_GetError() << std::endl;
         return -1;
     }
+    /* SDL_ttf初始化*/
+    retval = TTF_Init();
+    if (retval != 0)
+    {
+        std::cout << "SDL_TTF Init failed: " << SDL_GetError() << std::endl;
+        return -1;
+    }
     /* 创建SDL窗口*/
     SDL_Window *window = SDL_CreateWindow("SpaceShoot", 200, 200, 500, 600, SDL_WINDOW_SHOWN);
     if (window == nullptr)
@@ -45,15 +52,37 @@ int main(int, char const **)
         return -1;
     }
     /* 创建图片纹理*/
-    std::filesystem::path img_bg_path = cwd / "assets" / "image" / "bg.png";
+    std::filesystem::path img_bg_path = cwd / SPACESHOOT_IMG_PATH_BG;
     SDL_Texture *texture = IMG_LoadTexture(renderer, img_bg_path.string().c_str());
     if (texture == nullptr)
     {
-        std::cout << "Load image failed: " << SDL_GetError() << std::endl;
+        std::cout << "Create image texture failed: " << SDL_GetError() << std::endl;
+        return -1;
+    }
+    /* 创建字体对象*/
+    std::filesystem::path ttf_bg_path = cwd / SPACESHOOT_TTF_PATH_BG;
+    TTF_Font *font = TTF_OpenFont(ttf_bg_path.string().c_str(), SPACESHOOT_TTF_SIZE_BG);
+    if (font == nullptr)
+    {
+        std::cout << "Load font failed: " << SDL_GetError() << std::endl;
+        return -1;
+    }
+    /* 创建文本纹理*/
+    SDL_Color font_color = {255, 255, 255, 255};
+    SDL_Surface *font_surface = TTF_RenderUTF8_Blended(font, "Hello, SpaceShoot.", font_color);
+    if (font_surface == nullptr)
+    {
+        std::cout << "Create font surface failed: " << SDL_GetError() << std::endl;
+        return -1;
+    }
+    SDL_Texture *font_texture = SDL_CreateTextureFromSurface(renderer, font_surface);
+    if (font_texture == nullptr)
+    {
+        std::cout << "Create font texture failed: " << SDL_GetError() << std::endl;
         return -1;
     }
     /* 创建音频对象*/
-    std::filesystem::path mix_bg_path = cwd / "assets" / "music" / "03_Racing_Through_Asteroids_Loop.ogg";
+    std::filesystem::path mix_bg_path = cwd / SPACESHOOT_MIX_PATH_BG;
     Mix_Music *music = Mix_LoadMUS(mix_bg_path.string().c_str());
     if (music == nullptr)
     {
@@ -90,6 +119,10 @@ int main(int, char const **)
         SDL_Rect bg_rect = {200, 200, 100, 200};
         SDL_RenderCopy(renderer, texture, nullptr, &bg_rect); /* 不会显示绘制结果*/
 
+        /* 绘制文本纹理*/
+        SDL_Rect text_rect = {250, 250, font_surface->w, font_surface->h};
+        SDL_RenderCopy(renderer, font_texture, nullptr, &text_rect); /* 不会显示绘制结果*/
+
         /* 显示绘制结果*/
         SDL_RenderPresent(renderer);
     }
@@ -97,6 +130,10 @@ int main(int, char const **)
     /* 销毁音频对象*/
     Mix_FreeMusic(music);
     Mix_CloseAudio();
+    /* 销毁字体纹理*/
+    SDL_DestroyTexture(font_texture);
+    SDL_FreeSurface(font_surface);
+    TTF_CloseFont(font);
     /* 销毁图片纹理*/
     SDL_DestroyTexture(texture);
     /* 销毁渲染器*/
@@ -105,10 +142,12 @@ int main(int, char const **)
     SDL_DestroyWindow(window);
     /* 退出SDL_mixer*/
     Mix_Quit();
+    /* 退出SDL_ttf*/
+    TTF_Quit();
     /* 退出SDL_image*/
     IMG_Quit();
     /* 退出SDL*/
     SDL_Quit();
-    
+
     return 0;
 }

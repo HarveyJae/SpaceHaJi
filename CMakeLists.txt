@@ -22,6 +22,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin)
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
 find_package(SDL2_mixer REQUIRED)
+find_package(SDL2_ttf REQUIRED)
 # 如果当前库不支持camke预设，那么需要导入库的头文件路径和库链接路径
 # include_directories()
 # link_directories()
@@ -37,4 +38,5 @@ target_link_libraries(${TARGET}
     SDL2::SDL2
     SDL2_image::SDL2_image
     SDL2_mixer::SDL2_mixer
+    SDL2_ttf::SDL2_ttf
 )
