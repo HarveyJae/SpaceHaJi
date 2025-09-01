@@ -1,14 +1,11 @@
 ﻿#define SDL_MAIN_HANDLED
 #include <iostream>
-#include <filesystem>
 #include <SDL.h>
 #include "main.h"
 int main(int, char const **)
 {
     int retval = 0;
     std::cout << "Hello,SpaceShoot." << std::endl;
-    /* 获取当前工作区路径*/
-    std::filesystem::path cwd = std::filesystem::current_path();
     /* 初始化SDL*/
     retval = SDL_Init(SDL_INIT_EVERYTHING);
     if (retval != 0)
@@ -52,16 +49,14 @@ int main(int, char const **)
         return -1;
     }
     /* 创建图片纹理*/
-    std::filesystem::path img_bg_path = cwd / SPACESHOOT_IMG_PATH_BG;
-    SDL_Texture *texture = IMG_LoadTexture(renderer, img_bg_path.string().c_str());
+    SDL_Texture *texture = IMG_LoadTexture(renderer, SPACESHOOT_BG_IMAGE_PATH);
     if (texture == nullptr)
     {
         std::cout << "Create image texture failed: " << SDL_GetError() << std::endl;
         return -1;
     }
     /* 创建字体对象*/
-    std::filesystem::path ttf_bg_path = cwd / SPACESHOOT_TTF_PATH_BG;
-    TTF_Font *font = TTF_OpenFont(ttf_bg_path.string().c_str(), SPACESHOOT_TTF_SIZE_BG);
+    TTF_Font *font = TTF_OpenFont(SPACESHOOT_BG_FONT_PATH, SPACESHOOT_TTF_SIZE_BG);
     if (font == nullptr)
     {
         std::cout << "Load font failed: " << SDL_GetError() << std::endl;
@@ -82,8 +77,7 @@ int main(int, char const **)
         return -1;
     }
     /* 创建音频对象*/
-    std::filesystem::path mix_bg_path = cwd / SPACESHOOT_MIX_PATH_BG;
-    Mix_Music *music = Mix_LoadMUS(mix_bg_path.string().c_str());
+    Mix_Music *music = Mix_LoadMUS(SPACESHOOT_BG_MUSIC_PATH);
     if (music == nullptr)
     {
         std::cout << "Load mix failed: " << SDL_GetError() << std::endl;
