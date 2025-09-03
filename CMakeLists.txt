@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10.0)
 project(SpaceShoot VERSION 0.1 LANGUAGES C CXX)
 
 # 设置C++标准
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 1)
 # 编译器必须支持c++11，否则会报错
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
@@ -27,16 +27,30 @@ find_package(SDL2_ttf REQUIRED)
 # include_directories()
 # link_directories()
 
-# 设置可执行文件和平台相关
-set(TARGET ${PROJECT_NAME}_${CMAKE_SYSTEM_NAME})
-# 添加可执行文件
-add_executable(${TARGET} main.cpp)
+# game库路径
+add_subdirectory(src/game)
 
+# 设置可执行文件和平台相关
+set(
+    TARGET 
+    ${PROJECT_NAME}_${CMAKE_SYSTEM_NAME}
+)
+# 添加可执行文件
+add_executable(
+    ${TARGET} 
+    src/main.cpp
+)
+target_include_directories(
+    ${TARGET}
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Inc
+)
 # SDL2是包名，使用find_package的时候必须在库前面加上包名
-target_link_libraries(${TARGET}
+target_link_libraries(
+    ${TARGET}
     SDL2::SDL2main # 链接SDL2
     SDL2::SDL2
     SDL2_image::SDL2_image
     SDL2_mixer::SDL2_mixer
     SDL2_ttf::SDL2_ttf
+    game
 )
