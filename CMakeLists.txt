@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10.0)
 project(SpaceShoot VERSION 0.1 LANGUAGES C CXX)
 
 # 设置C++标准
-set(CMAKE_CXX_STANDARD 1)
+set(CMAKE_CXX_STANDARD 11)
 # 编译器必须支持c++11，否则会报错
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
@@ -29,7 +29,6 @@ find_package(SDL2_ttf REQUIRED)
 
 # game库路径
 add_subdirectory(src/game)
-
 # 设置可执行文件和平台相关
 set(
     TARGET 

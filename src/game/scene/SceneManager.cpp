@@ -7,7 +7,7 @@ SceneManager::SceneManager(/* args */)
 SceneManager::~SceneManager()
 {
 }
-void SceneManager::change_scene(Scene *scene)
+void SceneManager::change_scene([[maybe_unused]] Scene *scene)
 {
-    
+    scene = nullptr;
 }
