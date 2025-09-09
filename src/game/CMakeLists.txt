@@ -10,9 +10,15 @@ add_library(
 )
 target_include_directories(
     game
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+    PRIVATE
+    ${SDL2_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/scene
 )
 target_link_libraries(
     game
-    PRIVATE scene
+    PRIVATE
+    SDL2::SDL2main # 链接SDL2
+    SDL2::SDL2 # 链接SDL2 
+    scene
 )

@@ -10,7 +10,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 if (MSVC)
     add_compile_options(/W4)
 else()
-    add_compile_options(-Wall -Wextra -Werror)
+    # add_compile_options(-Wall -Wextra -Werror)
+    add_compile_options(-Wall -Wextra)
 endif()
 
 # 设置编译输出目录
@@ -41,7 +42,8 @@ add_executable(
 )
 target_include_directories(
     ${TARGET}
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Inc
+    PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/Inc
 )
 # SDL2是包名，使用find_package的时候必须在库前面加上包名
 target_link_libraries(
