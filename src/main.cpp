@@ -1,9 +1,16 @@
-﻿#define SDL_MAIN_HANDLED
-#include <iostream>
-#include <SDL.h>
+﻿#include <iostream>
 #include "main.h"
-int main(int, char const **)
+#include "GameManager.h"
+int main(int, char **)
 {
-
+    std::cout << "hello spaceshoot" << std::endl;
+    GameManager *game = new GameManager();
+    if (game == nullptr)
+    {
+        std::cout << "game new failed." << std::endl;
+        return -1;
+    }
+    game->init();
+    game->run();
     return 0;
 }

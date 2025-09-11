@@ -15,11 +15,10 @@ else()
 endif()
 
 # 设置编译输出目录
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 
-# 查找并载入SDL库的cmake预设，找不到会报错
+# 查找并载入SDL库的cmake预设，找不到会报错，只在顶层执行find命令
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
 find_package(SDL2_mixer REQUIRED)
@@ -28,7 +27,7 @@ find_package(SDL2_ttf REQUIRED)
 # include_directories()
 # link_directories()
 
-# game库路径
+# 执行子目录
 add_subdirectory(src/game)
 # 设置可执行文件和平台相关
 set(
@@ -40,15 +39,17 @@ add_executable(
     ${TARGET} 
     src/main.cpp
 )
+# 添加当前层的头文件路径
 target_include_directories(
     ${TARGET}
     PRIVATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/Inc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game/scene
 )
-# SDL2是包名，使用find_package的时候必须在库前面加上包名
+# SDL2是包名，使用find_package的时候必须在库前面加上包名，多层cmake只在最外层链接库，避免造成工程的入口点冲突
 target_link_libraries(
     ${TARGET}
-    SDL2::SDL2main # 链接SDL2
     SDL2::SDL2
     SDL2_image::SDL2_image
     SDL2_mixer::SDL2_mixer
