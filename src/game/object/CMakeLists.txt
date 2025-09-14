@@ -1,0 +1,20 @@
+set(
+    OBJECT_SRC
+    Fighter.cpp
+    Enemy.cpp
+)
+
+add_library(
+    object
+    ${OBJECT_SRC}
+)
+target_include_directories(
+    object
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+target_link_libraries(
+    object
+    PUBLIC
+    SDL2::SDL2
+)

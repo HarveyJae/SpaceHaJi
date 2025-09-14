@@ -1,12 +1,15 @@
-#ifndef __MAINSCENE_H__
-#define __MAINSCENE_H__
+#pragma once
 #include "Scene.h"
+#include "Fighter.h"
+#include "Enemy.h"
+#include "GameManager.h"
 class MainScene : public Scene
 {
 private:
-    /* data */
+    GameManager &game;
+    Fighter fighter;
 public:
-    MainScene(/* args */);
+    MainScene();
     ~MainScene();
 
     void init() override;
@@ -15,5 +18,3 @@ public:
     void clean() override;
     void handle_event(SDL_Event *event) override;
 };
-
-#endif

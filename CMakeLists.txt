@@ -39,20 +39,9 @@ add_executable(
     ${TARGET} 
     src/main.cpp
 )
-# 添加当前层的头文件路径
-target_include_directories(
-    ${TARGET}
-    PRIVATE 
-    ${CMAKE_CURRENT_SOURCE_DIR}/Inc
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game/scene
-)
 # SDL2是包名，使用find_package的时候必须在库前面加上包名，多层cmake只在最外层链接库，避免造成工程的入口点冲突
 target_link_libraries(
     ${TARGET}
-    SDL2::SDL2
-    SDL2_image::SDL2_image
-    SDL2_mixer::SDL2_mixer
-    SDL2_ttf::SDL2_ttf
+    PRIVATE
     game
 )

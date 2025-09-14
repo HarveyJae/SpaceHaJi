@@ -1,5 +1,4 @@
-#ifndef __SCENE_H__
-#define __SCENE_H__
+#pragma once
 #include <SDL.h>
 /**
  * @brief: 定义场景基类
@@ -7,9 +6,9 @@
 class Scene
 {
 private:
-    /* data */
+
 public:
-    Scene();
+    Scene() {};
     virtual ~Scene() = default;
 
     virtual void init() = 0;                         /* 初始化场景*/
@@ -18,5 +17,3 @@ public:
     virtual void clean() = 0;                        /* 清理场景资源*/
     virtual void handle_event(SDL_Event *event) = 0; /* 处理输入事件*/
 };
-
-#endif
