@@ -1,5 +1,6 @@
 set(
     OBJECT_SRC
+    GameObject.cpp
     Fighter.cpp
     Enemy.cpp
 )
@@ -11,10 +12,12 @@ add_library(
 target_include_directories(
     object
     PUBLIC
+    ${CMAKE_SOURCE_DIR}/src/game
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 target_link_libraries(
     object
     PUBLIC
     SDL2::SDL2
+    SDL2_image::SDL2_image
 )

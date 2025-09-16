@@ -1,5 +1,4 @@
 ﻿#include <iostream>
-#include "main.h"
 #include "GameManager.h"
 int main(int, char **)
 {

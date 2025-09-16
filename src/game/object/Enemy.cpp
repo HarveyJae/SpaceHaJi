@@ -14,6 +14,10 @@ void Enemy::update()
 void Enemy::render()
 {
 }
+void Enemy::clean()
+{
+    
+}
 void Enemy::handle_event(SDL_Event *event)
 {
 }

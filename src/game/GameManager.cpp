@@ -3,7 +3,8 @@
 #include "MainScene.h"
 #include "SDL.h"
 #include "SDL_image.h"
-GameManager::GameManager()
+#include <stdint.h>
+GameManager::GameManager() : frame_time(1000 / fps), speed_arg(1.0 / fps)
 {
 }
 
@@ -68,17 +69,25 @@ void GameManager::init()
 }
 void GameManager::run()
 {
+    uint32_t now_time = SDL_GetTicks();
+    uint32_t last_time = now_time;
     while (running_flag)
     {
-        if (current_scene == nullptr)
+        /* 执行1帧*/
+        if (now_time - last_time >= frame_time)
         {
-            std::cout << "Current scene is null, quit game." << std::endl;
-            return;
+            if (current_scene == nullptr)
+            {
+                std::cout << "Current scene is null, quit game." << std::endl;
+                return;
+            }
+            SDL_Event event;
+            handle_event(&event); /* 处理场景事件*/
+            update();             /* 更新*/
+            render();             /* 绘制*/
+            last_time = now_time;
         }
-        SDL_Event event;
-        handle_event(&event); /* 处理场景事件*/
-        update();             /* 更新*/
-        render();             /* 绘制*/
+        now_time = SDL_GetTicks();
     }
 }
 void GameManager::clean()

@@ -1,5 +1,6 @@
 set(
     SCENE_SRC
+    Scene.cpp
     MainScene.cpp
     TitleScene.cpp
     EndScene.cpp
@@ -11,8 +12,6 @@ add_library(
 target_include_directories(
     scene
     PUBLIC 
-    ${CMAKE_SOURCE_DIR}/Inc
-    ${CMAKE_SOURCE_DIR}/src/game
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
@@ -20,5 +19,4 @@ target_link_libraries(
     scene
     PUBLIC
     object
-    SDL2_image::SDL2_image
 )
