@@ -10,6 +10,8 @@ Fighter::~Fighter()
 }
 void Fighter::init()
 {
+    /* 配置fighter默认移动速度*/
+    get_speed() = SPACESHOOT_FIGHTER_DEFAULT_SPEED;
     SDL_Texture *texture = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_FIGHTER_IMAGE_PATH);
     get_texture() = texture;
     SDL_QueryTexture(texture, nullptr, nullptr, &get_width(), &get_height());
@@ -46,7 +48,7 @@ void Fighter::keyboard_ctrl()
     if (keyboard_state[SDL_SCANCODE_W])
     {
         /* 控制fighter*/
-        get_point().y -= SPACESHOOT_FIGHTER_DEFAULT_SPEED * get_game().get_speedArg();
+        get_point().y -= get_speed() * get_game().get_speedArg();
         /* 限制fighter移动范围*/
         if (get_point().y <= 0)
         {
@@ -56,7 +58,7 @@ void Fighter::keyboard_ctrl()
     if (keyboard_state[SDL_SCANCODE_A])
     {
         /* 控制fighter*/
-        get_point().x -= SPACESHOOT_FIGHTER_DEFAULT_SPEED * get_game().get_speedArg();
+        get_point().x -= get_speed() * get_game().get_speedArg();
         /* 限制fighter移动范围*/
         if (get_point().x <= 0)
         {
@@ -66,7 +68,7 @@ void Fighter::keyboard_ctrl()
     if (keyboard_state[SDL_SCANCODE_S])
     {
         /* 控制fighter*/
-        get_point().y += SPACESHOOT_FIGHTER_DEFAULT_SPEED * get_game().get_speedArg();
+        get_point().y += get_speed() * get_game().get_speedArg();
         /* 限制fighter移动范围*/
         if (get_point().y >= (get_game().get_height() - get_height()))
         {
@@ -76,7 +78,7 @@ void Fighter::keyboard_ctrl()
     if (keyboard_state[SDL_SCANCODE_D])
     {
         /* 控制fighter*/
-        get_point().x += SPACESHOOT_FIGHTER_DEFAULT_SPEED * get_game().get_speedArg();
+        get_point().x += get_speed() * get_game().get_speedArg();
         /* 限制fighter移动范围*/
         if (get_point().x >= (get_game().get_width() - get_width()))
         {
