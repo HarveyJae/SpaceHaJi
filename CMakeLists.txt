@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.10.0)
 project(SpaceShoot VERSION 0.1 LANGUAGES C CXX)
 
 # 设置C++标准
-set(CMAKE_CXX_STANDARD 11)
-# 编译器必须支持c++11，否则会报错
+set(CMAKE_CXX_STANDARD 17)
+# 编译器必须支持c++17，否则会报错
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # 设置编译选项

@@ -2,6 +2,8 @@
 #include "GameManager.h"
 #include "SDL.h"
 #include "SDL_image.h"
+#include "Bullet.h"
+#include <memory>
 Fighter::Fighter()
 {
 }
@@ -24,7 +26,7 @@ void Fighter::init()
 }
 void Fighter::update()
 {
-    keyboard_ctrl();
+    /* fighter的更新依赖于场景按键*/
 }
 void Fighter::render()
 {
@@ -41,48 +43,22 @@ void Fighter::clean()
 void Fighter::handle_event(SDL_Event *event)
 {
 }
-void Fighter::keyboard_ctrl()
+std::unique_ptr<Bullet> Fighter::shoot_bullet()
 {
-    /* 状态查询获取当前的键盘状态*/
-    const uint8_t *keyboard_state = SDL_GetKeyboardState(nullptr);
-    if (keyboard_state[SDL_SCANCODE_W])
+    uint32_t now_shootTime = SDL_GetTicks();
+    if (now_shootTime - last_shootTime >= cooldown_time)
     {
-        /* 控制fighter*/
-        get_point().y -= get_speed() * get_game().get_speedArg();
-        /* 限制fighter移动范围*/
-        if (get_point().y <= 0)
-        {
-            get_point().y = 0;
-        }
+        /* 创建一个bullet智能指针*/
+        auto bullet = std::make_unique<Bullet>();
+        /* 初始化bullet*/
+        bullet->init();
+        /* 定位子弹的初始坐标(fighter上面)*/
+        bullet->get_point().x = get_point().x + get_width() / 2 - bullet->get_width() / 2;
+        bullet->get_point().y = get_point().y;
+        /* 更新时间*/
+        last_shootTime = now_shootTime;
+        /* 返回bullet*/
+        return bullet;
     }
-    if (keyboard_state[SDL_SCANCODE_A])
-    {
-        /* 控制fighter*/
-        get_point().x -= get_speed() * get_game().get_speedArg();
-        /* 限制fighter移动范围*/
-        if (get_point().x <= 0)
-        {
-            get_point().x = 0;
-        }
-    }
-    if (keyboard_state[SDL_SCANCODE_S])
-    {
-        /* 控制fighter*/
-        get_point().y += get_speed() * get_game().get_speedArg();
-        /* 限制fighter移动范围*/
-        if (get_point().y >= (get_game().get_height() - get_height()))
-        {
-            get_point().y = (get_game().get_height() - get_height());
-        }
-    }
-    if (keyboard_state[SDL_SCANCODE_D])
-    {
-        /* 控制fighter*/
-        get_point().x += get_speed() * get_game().get_speedArg();
-        /* 限制fighter移动范围*/
-        if (get_point().x >= (get_game().get_width() - get_width()))
-        {
-            get_point().x = (get_game().get_width() - get_width());
-        }
-    }
+    return nullptr;
 }

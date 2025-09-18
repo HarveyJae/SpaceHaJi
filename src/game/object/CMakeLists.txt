@@ -3,6 +3,7 @@ set(
     GameObject.cpp
     Fighter.cpp
     Enemy.cpp
+    Bullet.cpp
 )
 
 add_library(
