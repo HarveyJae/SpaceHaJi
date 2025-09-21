@@ -4,6 +4,7 @@
 #include "GameManager.h"
 #include <memory>
 #include <vector>
+#include <random>
 MainScene::MainScene()
 {
 }
@@ -16,6 +17,13 @@ void MainScene::init()
     /* 初始化fighter对象*/
     fighter.init();
     /* 在射击的时候初始化bullet对象*/
+    /* 在enemy生成函数中初始化enemy对象*/
+    /* 获取随机数种子*/
+    std::random_device rd;
+    /* 初始化随机数分配器*/
+    gen = std::mt19937(rd());
+    /* 初始化随机数分布器*/
+    dis = std::uniform_real_distribution<float>(0.0f, 1.0f);
 }
 void MainScene::update()
 {
@@ -40,6 +48,25 @@ void MainScene::update()
             it++;
         }
     }
+    /* 创建enemy*/
+    create_enemy();
+    /* 更新bullet数组(用迭代器更新，方便清除)*/
+    for (auto it = enemys.begin(); it != enemys.end();)
+    {
+        if ((*it)->get_dead())
+        {
+            /* 清除enemy资源*/
+            (*it)->clean();
+            /* 删除当前enemy*/
+            it = enemys.erase(it);
+        }
+        else
+        {
+            /* 删除时会返回下一个迭代器，只有不删除时才更新*/
+            (*it)->update();
+            it++;
+        }
+    }
 }
 void MainScene::render()
 {
@@ -49,6 +76,11 @@ void MainScene::render()
     for (auto &bullet : bullets)
     {
         bullet->render();
+    }
+    /* 绘制enemy数组*/
+    for (auto &enemy : enemys)
+    {
+        enemy->render();
     }
 }
 void MainScene::clean()
@@ -61,6 +93,12 @@ void MainScene::clean()
         bullet->clean();
     }
     bullets.clear();
+    /* 清理enemy数组*/
+    for (auto &enemy : enemys)
+    {
+        enemy->clean();
+    }
+    enemys.clear();
 }
 void MainScene::handle_event(SDL_Event *event)
 {
@@ -70,6 +108,11 @@ void MainScene::handle_event(SDL_Event *event)
     for (auto &bullet : bullets)
     {
         bullet->handle_event(event);
+    }
+    /* 处理enemy事件*/
+    for (auto &enemy : enemys)
+    {
+        enemy->handle_event(event);
     }
 }
 void MainScene::keyboard_ctrl()
@@ -125,4 +168,22 @@ void MainScene::keyboard_ctrl()
             bullets.push_back(std::move(bullet));
         }
     }
+}
+void MainScene::create_enemy()
+{
+    /* 平均1s生成一个enemy*/
+    if (dis(gen) > 1.0f / (float)(get_game().get_fps()))
+    {
+        return;
+    }
+    /* 创建一个enemy智能指针*/
+    auto enemy = std::make_unique<Enemy>();
+    /* 初始化enemy*/
+    enemy->init();
+    /* 定位enemy的水平坐标(随机生成)*/
+    enemy->get_point().x = dis(gen) * (get_game().get_width() - enemy->get_width());
+    /* 定位enemy的垂直坐标(设置在屏幕上方)*/
+    enemy->get_point().y = -(float)(enemy->get_height());
+    /* 添加到数组中*/
+    enemys.push_back(std::move(enemy));
 }
