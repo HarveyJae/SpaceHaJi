@@ -27,9 +27,13 @@ void Fighter::init()
 void Fighter::update()
 {
     /* fighter的更新依赖于场景按键*/
+    /* 更新bullet*/
+    /* 更新bullet数组(用迭代器更新，方便清除)*/
+
 }
 void Fighter::render()
 {
+    /* 绘制fighter*/
     SDL_Rect Fighter_rect{static_cast<int>(get_point().x), static_cast<int>(get_point().y), get_width(), get_height()};
     SDL_RenderCopy(get_game().get_renderer(), get_texture(), nullptr, &Fighter_rect);
 }
@@ -43,13 +47,15 @@ void Fighter::clean()
 void Fighter::handle_event(SDL_Event *event)
 {
 }
-std::unique_ptr<Bullet> Fighter::shoot_bullet()
+std::unique_ptr<Bullet> Fighter::shoot_bullet(GameObject *target)
 {
     uint32_t now_shootTime = SDL_GetTicks();
     if (now_shootTime - last_shootTime >= cooldown_time)
     {
         /* 创建一个bullet智能指针*/
-        auto bullet = std::make_unique<Bullet>();
+        auto bullet = std::make_unique<Bullet>(Bullet::FIGHTER_BULLET);
+        /* 计算射击方向(fighter的target固定为nullptr)*/
+        bullet->cal_direction(this, target);
         /* 初始化bullet*/
         bullet->init();
         /* 定位子弹的初始坐标(fighter上面)*/
@@ -57,7 +63,7 @@ std::unique_ptr<Bullet> Fighter::shoot_bullet()
         bullet->get_point().y = get_point().y;
         /* 更新时间*/
         last_shootTime = now_shootTime;
-        /* 返回bullet*/
+        /* 添加到bullet数组中*/
         return bullet;
     }
     return nullptr;

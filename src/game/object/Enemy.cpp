@@ -1,6 +1,8 @@
 #include "Enemy.h"
 #include "SDL_image.h"
+#include "Bullet.h"
 #include "GameManager.h"
+#include <memory>
 Enemy::Enemy()
 {
 }
@@ -46,4 +48,24 @@ void Enemy::clean()
 }
 void Enemy::handle_event(SDL_Event *event)
 {
+}
+std::unique_ptr<Bullet> Enemy::shoot_bullet(GameObject *target)
+{
+    uint32_t now_shootTime = SDL_GetTicks();
+    if (now_shootTime - last_shootTime >= cooldown_time)
+    {
+        /* 创建一个bullet智能指针*/
+        auto bullet = std::make_unique<Bullet>(Bullet::ENEMY_BULLET);
+        /* 计算射击方向*/
+        bullet->cal_direction(this, target);
+        /* 初始化bullet*/
+        bullet->init();
+        /* 定位子弹的初始坐标(enemy中央发射)*/
+        bullet->get_point().x = get_point().x + get_width() / 2 - bullet->get_width() / 2;
+        bullet->get_point().y = get_point().y + get_height() / 2 - bullet->get_height() / 2;
+        /* 更新时间*/
+        last_shootTime = now_shootTime;
+        return bullet;
+    }
+    return nullptr;
 }

@@ -1,34 +1,65 @@
 #include "Bullet.h"
 #include "SDL_image.h"
 #include "GameManager.h"
-Bullet::Bullet()
+#include <cmath>
+#include <cstdint>
+Bullet::Bullet(uint8_t type)
 {
+    this->type = type;
 }
 Bullet::~Bullet()
 {
 }
 void Bullet::init()
 {
-    /* 配置bullet默认移动速度*/
-    get_speed() = SPACESHOOT_BULLET_DEFAULT_SPEED;
-    SDL_Texture *texture = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_BULLET_IMAGE_PATH);
+    SDL_Texture *texture = nullptr;
+    if (type == FIGHTER_BULLET)
+    {
+        /* 配置速度*/
+        get_speed() = SPACESHOOT_FIGHTER_BULLET_DEFAULT_SPEED;
+        /* 加载图片*/
+        texture = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_FIGHTER_BULLET_IMAGE_PATH);
+    }
+    else if (type == ENEMY_BULLET)
+    {
+        /* 配置速度*/
+        get_speed() = SPACESHOOT_ENEMY_BULLET_DEFAULT_SPEED;
+        /* 加载图片*/
+        texture = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_ENEMY_BULLET_IMAGE_PATH);
+    }
     get_texture() = texture;
     SDL_QueryTexture(texture, nullptr, nullptr, &get_width(), &get_height());
-    /* 等比例缩放bullet图片*/
+    /* 等比例缩放*/
     get_width() = get_width() / 2;
     get_height() = get_height() / 2;
     /* 定义bullet起始坐标*/
-    get_point().x = get_game().get_width() / 2 - get_width() / 2;
-    get_point().y = get_game().get_height() - get_height();
+    get_point().x = 0;
+    get_point().y = 0;
 }
 void Bullet::update()
 {
-    /* 根据bullet的位置和bullet的速度更新(不需要更新x)*/
-    get_point().y -= get_speed() * get_game().get_speedArg();
-    if (get_point().y < 0)
+    if (type == FIGHTER_BULLET)
     {
-        /* 设置dead标志，等待被清空*/
-        get_dead() = true;
+        /* 根据速度更新坐标(不需要更新x)*/
+        get_point().y += direction.y * get_speed() * get_game().get_speedArg();
+        /* 边界判断*/
+        if (get_point().y < 0)
+        {
+            /* 设置dead标志，等待被清空*/
+            get_dead() = true;
+        }
+    }
+    else if (type == ENEMY_BULLET)
+    {
+        /* 根据速度更新坐标*/
+        get_point().y += direction.y * get_speed() * get_game().get_speedArg();
+        get_point().x += direction.x * get_speed() * get_game().get_speedArg();
+        /* 边界判断*/
+        if (get_point().y < 0 || get_point().y > get_game().get_height() || get_point().x < 0 || get_point().x > get_game().get_width())
+        {
+            /* 设置dead标志，等待被清空*/
+            get_dead() = true;
+        }
     }
 }
 void Bullet::render()
@@ -45,4 +76,42 @@ void Bullet::clean()
 }
 void Bullet::handle_event(SDL_Event *event)
 {
+}
+/**
+ * @brief: bullet初始化前调用
+ */
+void Bullet::cal_direction(GameObject *master, GameObject *target)
+{
+    if (master == nullptr || target == nullptr)
+    {
+        if (type == Bullet::FIGHTER_BULLET)
+        {
+            direction.x = 0.0f;
+            direction.y = -1.0f;
+        }
+        else if (type == Bullet::ENEMY_BULLET)
+        {
+            direction.x = 0.0f;
+            direction.y = 1.0f;
+        }
+        return;
+    }
+    /* 计算从master中心到target中心的向量*/
+    auto x = (target->get_point().x + target->get_width() / 2) - (master->get_point().x + master->get_width() / 2);
+    auto y = (target->get_point().y + target->get_height() / 2) - (master->get_point().y + master->get_height() / 2);
+
+    /* 计算向量长度*/
+    auto length = std::sqrt(x * x + y * y);
+
+    if (length == 0.0f)
+    {
+        /* master 与 target 重叠时保持默认方向*/
+        direction.x = 0.0f;
+        direction.y = (type == Bullet::FIGHTER_BULLET) ? -1.0f : 1.0f;
+        return;
+    }
+
+    /* 射击方向(向量归一化)*/
+    direction.x = x / length;
+    direction.y = y / length;
 }

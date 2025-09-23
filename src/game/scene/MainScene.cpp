@@ -16,8 +16,6 @@ void MainScene::init()
 {
     /* 初始化fighter对象*/
     fighter.init();
-    /* 在射击的时候初始化bullet对象*/
-    /* 在enemy生成函数中初始化enemy对象*/
     /* 获取随机数种子*/
     std::random_device rd;
     /* 初始化随机数分配器*/
@@ -31,81 +29,37 @@ void MainScene::update()
     keyboard_ctrl();
     /* 更新fighter帧*/
     fighter.update();
-    /* 更新bullet数组(用迭代器更新，方便清除)*/
-    for (auto it = bullets.begin(); it != bullets.end();)
-    {
-        if ((*it)->get_dead())
-        {
-            /* 清除bullet资源*/
-            (*it)->clean();
-            /* 删除当前bullet*/
-            it = bullets.erase(it);
-        }
-        else
-        {
-            /* 删除时会返回下一个迭代器，只有不删除时才更新*/
-            (*it)->update();
-            it++;
-        }
-    }
-    /* 创建enemy*/
+    /* 按既定概率创建enemy*/
     create_enemy();
-    /* 更新bullet数组(用迭代器更新，方便清除)*/
-    for (auto it = enemys.begin(); it != enemys.end();)
-    {
-        if ((*it)->get_dead())
-        {
-            /* 清除enemy资源*/
-            (*it)->clean();
-            /* 删除当前enemy*/
-            it = enemys.erase(it);
-        }
-        else
-        {
-            /* 删除时会返回下一个迭代器，只有不删除时才更新*/
-            (*it)->update();
-            it++;
-        }
-    }
+    /* 更新enemy*/
+    update_enemy();
+    /* 更新bullet*/
+    update_bullet();
 }
 void MainScene::render()
 {
     /* 绘制fighter帧*/
     fighter.render();
-    /* 绘制bullet数组*/
-    for (auto &bullet : bullets)
-    {
-        bullet->render();
-    }
-    /* 绘制enemy数组*/
-    for (auto &enemy : enemys)
-    {
-        enemy->render();
-    }
+    /* 绘制enemy*/
+    render_enemy();
+    /* 绘制bullet*/
+    render_bullet();
 }
 void MainScene::clean()
 {
     /* 清除fighter对象*/
     fighter.clean();
-    /* 清理bullet数组*/
-    for (auto &bullet : bullets)
-    {
-        bullet->clean();
-    }
-    bullets.clear();
-    /* 清理enemy数组*/
-    for (auto &enemy : enemys)
-    {
-        enemy->clean();
-    }
-    enemys.clear();
+    /* 清除enemy*/
+    clean_enemy();
+    /* 清除bullet*/
+    clean_bullet();
 }
 void MainScene::handle_event(SDL_Event *event)
 {
     /* 处理fighter事件*/
     fighter.handle_event(event);
     /* 处理bullet事件*/
-    for (auto &bullet : bullets)
+    for (auto &bullet : fighter_bullets)
     {
         bullet->handle_event(event);
     }
@@ -161,11 +115,11 @@ void MainScene::keyboard_ctrl()
     }
     if (keyboard_state[SDL_SCANCODE_SPACE])
     {
-        /* 射击bullet*/
-        auto bullet = fighter.shoot_bullet();
-        if (bullet)
+        /* fighter射击bullet(参数固定是nullptr)*/
+        auto bullet = fighter.shoot_bullet(nullptr);
+        if (bullet != nullptr)
         {
-            bullets.push_back(std::move(bullet));
+            fighter_bullets.push_back(std::move(bullet));
         }
     }
 }
@@ -186,4 +140,106 @@ void MainScene::create_enemy()
     enemy->get_point().y = -(float)(enemy->get_height());
     /* 添加到数组中*/
     enemys.push_back(std::move(enemy));
+}
+void MainScene::update_enemy()
+{
+    for (auto it = enemys.begin(); it != enemys.end();)
+    {
+        if ((*it)->get_dead())
+        {
+            /* 清除enemy资源*/
+            (*it)->clean();
+            /* 删除当前enemy*/
+            it = enemys.erase(it);
+        }
+        else
+        {
+            /* 删除时会返回下一个迭代器，只有不删除时才更新*/
+            /* enemy射击*/
+            auto bullet = (*it)->shoot_bullet(&fighter);
+            if(bullet != nullptr)
+            {
+                enemy_bullets.push_back(std::move(bullet));
+            }
+            /* 更新enemy*/
+            (*it)->update();
+            it++;
+        }
+    }
+}
+void MainScene::update_bullet()
+{
+    /* 更新fighter_bullet*/
+    for (auto it = fighter_bullets.begin(); it != fighter_bullets.end();)
+    {
+        if ((*it)->get_dead())
+        {
+            /* 清除bullet资源*/
+            (*it)->clean();
+            /* 删除当前bullet*/
+            it = fighter_bullets.erase(it);
+        }
+        else
+        {
+            /* 删除时会返回下一个迭代器，只有不删除时才更新*/
+            (*it)->update();
+            it++;
+        }
+    }
+    /* 更新enemy_bullet*/
+    for (auto it = enemy_bullets.begin(); it != enemy_bullets.end();)
+    {
+        if ((*it)->get_dead())
+        {
+            /* 清除bullet资源*/
+            (*it)->clean();
+            /* 删除当前bullet*/
+            it = enemy_bullets.erase(it);
+        }
+        else
+        {
+            /* 删除时会返回下一个迭代器，只有不删除时才更新*/
+            (*it)->update();
+            it++;
+        }
+    }
+}
+void MainScene::render_enemy()
+{
+    for (auto &enemy : enemys)
+    {
+        enemy->render();
+    }
+}
+void MainScene::render_bullet()
+{
+    for (auto &bullet : fighter_bullets)
+    {
+        bullet->render();
+    }
+    for (auto &bullet : enemy_bullets)
+    {
+        bullet->render();
+    }
+}
+void MainScene::clean_enemy()
+{
+    for (auto &enemy : enemys)
+    {
+        enemy->clean();
+    }
+    enemys.clear();
+}
+void MainScene::clean_bullet()
+{
+    for (auto &bullet : fighter_bullets)
+    {
+        bullet->clean();
+    }
+    fighter_bullets.clear();
+    for (auto &bullet : enemy_bullets)
+    {
+        bullet->clean();
+    }
+    enemy_bullets.clear();
 }
