@@ -14,6 +14,12 @@ void Fighter::init()
 {
     /* 配置fighter默认移动速度*/
     get_speed() = SPACESHOOT_FIGHTER_DEFAULT_SPEED;
+    /* 配置fighter默认生命值*/
+    get_health() = SPACESHOOT_FIGHTER_DEFAULT_TOTAL_HEALTH;
+    get_curHealth() = SPACESHOOT_FIGHTER_DEFAULT_TOTAL_HEALTH;
+    /* 配置fighter默认伤害*/
+    get_damage() = SPACESHOOT_FIGHTER_DEFAULT_DAMAGE;
+    /* 加载texture*/
     SDL_Texture *texture = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_FIGHTER_IMAGE_PATH);
     get_texture() = texture;
     SDL_QueryTexture(texture, nullptr, nullptr, &get_width(), &get_height());
@@ -29,7 +35,6 @@ void Fighter::update()
     /* fighter的更新依赖于场景按键*/
     /* 更新bullet*/
     /* 更新bullet数组(用迭代器更新，方便清除)*/
-
 }
 void Fighter::render()
 {
@@ -47,8 +52,13 @@ void Fighter::clean()
 void Fighter::handle_event(SDL_Event *event)
 {
 }
-std::unique_ptr<Bullet> Fighter::shoot_bullet(GameObject *target)
+std::unique_ptr<Bullet> Fighter::shoot_bullet(GameObject *target, uint32_t damage)
 {
+    /* 无伤害 == 不发射*/
+    if (damage == 0)
+    {
+        return nullptr;
+    }
     uint32_t now_shootTime = SDL_GetTicks();
     if (now_shootTime - last_shootTime >= cooldown_time)
     {
@@ -58,6 +68,8 @@ std::unique_ptr<Bullet> Fighter::shoot_bullet(GameObject *target)
         bullet->cal_direction(this, target);
         /* 初始化bullet*/
         bullet->init();
+        /* 配置bullet伤害*/
+        bullet->get_damage() = damage;
         /* 定位子弹的初始坐标(fighter上面)*/
         bullet->get_point().x = get_point().x + get_width() / 2 - bullet->get_width() / 2;
         bullet->get_point().y = get_point().y;

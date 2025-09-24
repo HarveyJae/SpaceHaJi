@@ -21,6 +21,12 @@ private:
     int height = 0;
     /* 移动速度(px/s)*/
     int speed = 0;
+    /* 总生命值*/
+    uint32_t health = 0;
+    /* 当前生命值*/
+    uint32_t current_health = 0;
+    /* 伤害值*/
+    uint32_t damage = 0;
     /* 生命标志位*/
     bool active = false; /* 活动标志*/
     bool dead = false;   /* 删除标志*/
@@ -40,6 +46,9 @@ public:
     int &get_width() { return width; }
     int &get_height() { return height; }
     int &get_speed() { return speed; }
+    uint32_t &get_health() { return health; }
+    uint32_t &get_curHealth() { return current_health; }
+    uint32_t &get_damage() { return damage; }
     bool &get_active() { return active; }
     bool &get_dead() { return dead; }
 };

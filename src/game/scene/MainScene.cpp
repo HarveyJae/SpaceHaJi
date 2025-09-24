@@ -116,7 +116,7 @@ void MainScene::keyboard_ctrl()
     if (keyboard_state[SDL_SCANCODE_SPACE])
     {
         /* fighter射击bullet(参数固定是nullptr)*/
-        auto bullet = fighter.shoot_bullet(nullptr);
+        auto bullet = fighter.shoot_bullet(nullptr, fighter.get_damage());
         if (bullet != nullptr)
         {
             fighter_bullets.push_back(std::move(bullet));
@@ -156,7 +156,7 @@ void MainScene::update_enemy()
         {
             /* 删除时会返回下一个迭代器，只有不删除时才更新*/
             /* enemy射击*/
-            auto bullet = (*it)->shoot_bullet(&fighter);
+            auto bullet = (*it)->shoot_bullet(&fighter, (*it)->get_damage());
             if(bullet != nullptr)
             {
                 enemy_bullets.push_back(std::move(bullet));

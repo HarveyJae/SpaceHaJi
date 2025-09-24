@@ -16,6 +16,7 @@ private:
     uint8_t type = NONE_BULLET;
     /* bullet的方向*/
     SDL_FPoint direction = {0, 0};
+
 public:
     Bullet(uint8_t type);
     ~Bullet();
