@@ -65,7 +65,20 @@ void Bullet::update()
 void Bullet::render()
 {
     SDL_Rect Bullet_rect{static_cast<int>(get_point().x), static_cast<int>(get_point().y), get_width(), get_height()};
-    SDL_RenderCopy(get_game().get_renderer(), get_texture(), nullptr, &Bullet_rect);
+    /* 旋转enemy的bullet，时刻朝向fighter*/
+    if (type == ENEMY_BULLET)
+    {
+        /* 计算方向角度(x轴为基准)*/
+        float angle = std::atan2(direction.y, direction.x) * 180.0 / M_PI - 90;
+        /* 旋转中心*/
+        SDL_Point center{get_width() / 2, get_height() / 2};
+        /* 旋转绘制*/
+        SDL_RenderCopyEx(get_game().get_renderer(), get_texture(), nullptr, &Bullet_rect, angle, &center, SDL_FLIP_NONE);
+    }
+    else
+    {
+        SDL_RenderCopy(get_game().get_renderer(), get_texture(), nullptr, &Bullet_rect);
+    }
 }
 void Bullet::clean()
 {
