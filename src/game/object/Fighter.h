@@ -18,6 +18,7 @@ private:
     uint32_t cooldown_time = SPACESHOOT_FIGHTER_DEFAULT_COLLDOWN_TIME;
     /* 上次射击时间*/
     uint32_t last_shootTime = 0;
+    bool clean_flag = false;
 
 public:
     Fighter();
@@ -28,6 +29,8 @@ public:
     void clean() override;
     void handle_event(SDL_Event *event) override;
 
+    /* 定义修改器*/
+    bool &get_cleanFlag() { return clean_flag; }
     /* 射击*/
     std::unique_ptr<Bullet> shoot_bullet(GameObject *target, uint32_t damage);
 };

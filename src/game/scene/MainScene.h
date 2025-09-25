@@ -25,18 +25,30 @@ private:
     void keyboard_ctrl();
     /* enemy生成器*/
     void create_enemy();
+    /* 更新fighter*/
+    void update_fighter();
     /* 更新enemy*/
     void update_enemy();
     /* 更新bullet*/
-    void update_bullet();
+    void update_fighterBullet();
+    void update_enemyBullet();
+    /* 绘制fighter*/
+    void render_fighter();
     /* 绘制enemy*/
     void render_enemy();
     /* 绘制bullet*/
-    void render_bullet();
+    void render_fighterBullet();
+    void render_enemyBullet();
+    /* 清除fighter*/
+    void clean_fighter();
     /* 清理enemy*/
     void clean_enemy();
     /* 清理bullet*/
-    void clean_bullet();
+    void clean_fighterBullet();
+    void clean_enemyBullet();
+    /* 爆炸*/
+    void explode_fighter(Fighter *fighter);
+    void explode_enemy(Enemy *enemy);
 
 public:
     MainScene();

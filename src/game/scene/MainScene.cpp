@@ -28,31 +28,34 @@ void MainScene::update()
     /* 场景键盘操作*/
     keyboard_ctrl();
     /* 更新fighter帧*/
-    fighter.update();
+    update_fighter();
     /* 按既定概率创建enemy*/
     create_enemy();
     /* 更新enemy*/
     update_enemy();
     /* 更新bullet*/
-    update_bullet();
+    update_fighterBullet();
+    update_enemyBullet();
 }
 void MainScene::render()
 {
     /* 绘制fighter帧*/
-    fighter.render();
+    render_fighter();
     /* 绘制enemy*/
     render_enemy();
     /* 绘制bullet*/
-    render_bullet();
+    render_fighterBullet();
+    render_enemyBullet();
 }
 void MainScene::clean()
 {
-    /* 清除fighter对象*/
-    fighter.clean();
+    /* 清除fighter*/
+    clean_fighter();
     /* 清除enemy*/
     clean_enemy();
     /* 清除bullet*/
-    clean_bullet();
+    clean_fighterBullet();
+    clean_enemyBullet();
 }
 void MainScene::handle_event(SDL_Event *event)
 {
@@ -141,6 +144,21 @@ void MainScene::create_enemy()
     /* 添加到数组中*/
     enemys.push_back(std::move(enemy));
 }
+void MainScene::update_fighter()
+{
+    if (fighter.get_dead())
+    {
+        fighter.clean();
+        fighter.get_cleanFlag() = true;
+    }
+    else
+    {
+        fighter.update();
+    }
+}
+/**
+ * @todo: 在update里面添加碰撞检测
+ */
 void MainScene::update_enemy()
 {
     for (auto it = enemys.begin(); it != enemys.end();)
@@ -157,7 +175,7 @@ void MainScene::update_enemy()
             /* 删除时会返回下一个迭代器，只有不删除时才更新*/
             /* enemy射击*/
             auto bullet = (*it)->shoot_bullet(&fighter, (*it)->get_damage());
-            if(bullet != nullptr)
+            if (bullet != nullptr)
             {
                 enemy_bullets.push_back(std::move(bullet));
             }
@@ -167,11 +185,12 @@ void MainScene::update_enemy()
         }
     }
 }
-void MainScene::update_bullet()
+void MainScene::update_fighterBullet()
 {
     /* 更新fighter_bullet*/
     for (auto it = fighter_bullets.begin(); it != fighter_bullets.end();)
     {
+        /* bullet越界*/
         if ((*it)->get_dead())
         {
             /* 清除bullet资源*/
@@ -181,11 +200,41 @@ void MainScene::update_bullet()
         }
         else
         {
-            /* 删除时会返回下一个迭代器，只有不删除时才更新*/
+            /* 更新fighter_bullet*/
             (*it)->update();
+            /* enemy击中检测*/
+            SDL_Rect bullet_rect{
+                static_cast<int>((*it)->get_point().x),
+                static_cast<int>((*it)->get_point().y),
+                (*it)->get_width(),
+                (*it)->get_height()};
+            for (auto &enemy : enemys)
+            {
+                SDL_Rect enemy_rect{
+                    static_cast<int>(enemy->get_point().x),
+                    static_cast<int>(enemy->get_point().y),
+                    enemy->get_width(),
+                    enemy->get_height()};
+                if (SDL_HasIntersection(&bullet_rect, &enemy_rect))
+                {
+                    /* 一枚bullet只能击中一个enemy*/
+                    (*it)->get_dead() = true;
+                    /* 血量扣除*/
+                    enemy->get_curHealth() -= (*it)->get_damage();
+                    /* 血量检测*/
+                    if (enemy->get_curHealth() <= 0)
+                    {
+                        explode_enemy(enemy.get());
+                    }
+                    break;
+                }
+            }
             it++;
         }
     }
+}
+void MainScene::update_enemyBullet()
+{
     /* 更新enemy_bullet*/
     for (auto it = enemy_bullets.begin(); it != enemy_bullets.end();)
     {
@@ -198,11 +247,38 @@ void MainScene::update_bullet()
         }
         else
         {
-            /* 删除时会返回下一个迭代器，只有不删除时才更新*/
+            /* 更新enemy_bullet*/
             (*it)->update();
+            /* enemy击中检测*/
+            SDL_Rect bullet_rect{
+                static_cast<int>((*it)->get_point().x),
+                static_cast<int>((*it)->get_point().y),
+                (*it)->get_width(),
+                (*it)->get_height()};
+            SDL_Rect fighter_rect{
+                static_cast<int>(fighter.get_point().x),
+                static_cast<int>(fighter.get_point().y),
+                fighter.get_width(),
+                fighter.get_height()};
+            if (SDL_HasIntersection(&bullet_rect, &fighter_rect))
+            {
+                /* 一枚bullet只能击中一个enemy*/
+                (*it)->get_dead() = true;
+                /* 血量扣除*/
+                fighter.get_curHealth() -= (*it)->get_damage();
+                /* 血量检测*/
+                if (fighter.get_curHealth() <= 0)
+                {
+                    explode_fighter(&fighter);
+                }
+            }
             it++;
         }
     }
+}
+void MainScene::render_fighter()
+{
+    fighter.render();
 }
 void MainScene::render_enemy()
 {
@@ -211,15 +287,25 @@ void MainScene::render_enemy()
         enemy->render();
     }
 }
-void MainScene::render_bullet()
+void MainScene::render_fighterBullet()
 {
     for (auto &bullet : fighter_bullets)
     {
         bullet->render();
     }
+}
+void MainScene::render_enemyBullet()
+{
     for (auto &bullet : enemy_bullets)
     {
         bullet->render();
+    }
+}
+void MainScene::clean_fighter()
+{
+    if (!fighter.get_cleanFlag())
+    {
+        fighter.clean();
     }
 }
 void MainScene::clean_enemy()
@@ -230,16 +316,31 @@ void MainScene::clean_enemy()
     }
     enemys.clear();
 }
-void MainScene::clean_bullet()
+void MainScene::clean_fighterBullet()
 {
     for (auto &bullet : fighter_bullets)
     {
         bullet->clean();
     }
     fighter_bullets.clear();
+}
+void MainScene::clean_enemyBullet()
+{
     for (auto &bullet : enemy_bullets)
     {
         bullet->clean();
     }
     enemy_bullets.clear();
+}
+void MainScene::explode_fighter(Fighter *fighter)
+{
+    /* dead标志*/
+    fighter->get_dead() = true;
+}
+void MainScene::explode_enemy(Enemy *enemy)
+{
+    /* dead标志*/
+    enemy->get_dead() = true;
+    /* hit标志*/
+    enemy->get_hitFlag() = true;
 }

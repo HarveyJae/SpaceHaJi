@@ -32,9 +32,7 @@ void Fighter::init()
 }
 void Fighter::update()
 {
-    /* fighter的更新依赖于场景按键*/
-    /* 更新bullet*/
-    /* 更新bullet数组(用迭代器更新，方便清除)*/
+    /* nothing to do...*/
 }
 void Fighter::render()
 {
