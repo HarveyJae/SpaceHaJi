@@ -3,8 +3,9 @@ set(
     GameManager.cpp
 )
 # 子目录
-add_subdirectory(object)
 add_subdirectory(scene)
+add_subdirectory(object)
+add_subdirectory(effect)
 # 添加库
 add_library(
     game
