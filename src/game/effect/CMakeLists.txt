@@ -1,6 +1,7 @@
 set(
     EFFECT_SRC
     GameEffect.cpp
+    Explosion.cpp
 )
 
 add_library(
