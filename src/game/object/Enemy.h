@@ -12,6 +12,7 @@
 
 /* 前向声明*/
 class Bullet;
+class Explosion;
 class Enemy : public GameObject
 {
 private:
@@ -35,4 +36,6 @@ public:
     bool &get_hitFlag() { return hit_flag; }
     /* 射击*/
     std::unique_ptr<Bullet> shoot_bullet(GameObject *target, uint32_t damage);
+    /* 爆炸*/
+    std::unique_ptr<Explosion> explode();
 };

@@ -36,6 +36,8 @@ void MainScene::update()
     /* 更新bullet*/
     update_fighterBullet();
     update_enemyBullet();
+    /* 更新explosion*/
+    update_explosion();
 }
 void MainScene::render()
 {
@@ -46,6 +48,8 @@ void MainScene::render()
     /* 绘制bullet*/
     render_fighterBullet();
     render_enemyBullet();
+    /* 绘制explosion*/
+    render_explosion();
 }
 void MainScene::clean()
 {
@@ -56,20 +60,31 @@ void MainScene::clean()
     /* 清除bullet*/
     clean_fighterBullet();
     clean_enemyBullet();
+    /* 清除explosion*/
+    clean_explosion();
 }
 void MainScene::handle_event(SDL_Event *event)
 {
     /* 处理fighter事件*/
     fighter.handle_event(event);
+    /* 处理enemy事件*/
+    for (auto &enemy : enemys)
+    {
+        enemy->handle_event(event);
+    }
     /* 处理bullet事件*/
     for (auto &bullet : fighter_bullets)
     {
         bullet->handle_event(event);
     }
-    /* 处理enemy事件*/
-    for (auto &enemy : enemys)
+    for (auto &bullet : enemy_bullets)
     {
-        enemy->handle_event(event);
+        bullet->handle_event(event);
+    }
+    /* 处理explosion事件*/
+    for (auto &explosion : explosions)
+    {
+        explosion->handle_event(event);
     }
 }
 void MainScene::keyboard_ctrl()
@@ -224,7 +239,13 @@ void MainScene::update_fighterBullet()
                     /* 血量检测*/
                     if (enemy->get_curHealth() <= 0)
                     {
-                        explode_enemy(enemy.get());
+                        /* dead标志*/
+                        enemy->get_dead() = true;
+                        /* hit标志*/
+                        enemy->get_hitFlag() = true;
+                        /* 爆炸*/
+                        auto explosion = enemy->explode();
+                        explosions.push_back(std::move(explosion));
                     }
                     break;
                 }
@@ -269,9 +290,29 @@ void MainScene::update_enemyBullet()
                 /* 血量检测*/
                 if (fighter.get_curHealth() <= 0)
                 {
-                    explode_fighter(&fighter);
+                    /* dead标志*/
+                    fighter.get_dead() = true;
+                    /* 爆炸*/
+                    auto explosion = fighter.explode();
+                    explosions.push_back(std::move(explosion));
                 }
             }
+            it++;
+        }
+    }
+}
+void MainScene::update_explosion()
+{
+    for (auto it = explosions.begin(); it != explosions.end();)
+    {
+        if ((*it)->get_finish())
+        {
+            (*it)->clean();
+            it = explosions.erase(it);
+        }
+        else
+        {
+            (*it)->update();
             it++;
         }
     }
@@ -299,6 +340,13 @@ void MainScene::render_enemyBullet()
     for (auto &bullet : enemy_bullets)
     {
         bullet->render();
+    }
+}
+void MainScene::render_explosion()
+{
+    for (auto &explosion : explosions)
+    {
+        explosion->render();
     }
 }
 void MainScene::clean_fighter()
@@ -332,15 +380,11 @@ void MainScene::clean_enemyBullet()
     }
     enemy_bullets.clear();
 }
-void MainScene::explode_fighter(Fighter *fighter)
+void MainScene::clean_explosion()
 {
-    /* dead标志*/
-    fighter->get_dead() = true;
-}
-void MainScene::explode_enemy(Enemy *enemy)
-{
-    /* dead标志*/
-    enemy->get_dead() = true;
-    /* hit标志*/
-    enemy->get_hitFlag() = true;
+    for (auto &explosion : explosions)
+    {
+        explosion->clean();
+    }
+    explosions.clear();
 }

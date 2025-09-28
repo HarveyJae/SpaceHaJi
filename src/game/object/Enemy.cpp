@@ -1,6 +1,7 @@
 #include "Enemy.h"
 #include "SDL_image.h"
 #include "Bullet.h"
+#include "Explosion.h"
 #include "GameManager.h"
 #include <memory>
 Enemy::Enemy()
@@ -81,4 +82,19 @@ std::unique_ptr<Bullet> Enemy::shoot_bullet(GameObject *target, uint32_t damage)
         return bullet;
     }
     return nullptr;
+}
+std::unique_ptr<Explosion> Enemy::explode()
+{
+    /* 创建爆炸效果*/
+    auto explosion = std::make_unique<Explosion>();
+    /* 初始化*/
+    explosion->init();
+    /* 设置效果尺寸*/
+    explosion->get_eWidth() = get_width();
+    explosion->get_eHeight() = get_height();
+    /* 定位爆炸坐标(宿主坐标)*/
+    /* 由于宿主尺寸和效果尺寸相同，因此中心点重合*/
+    explosion->get_point().x = get_point().x;
+    explosion->get_point().y = get_point().y;
+    return explosion;
 }

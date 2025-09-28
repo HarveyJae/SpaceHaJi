@@ -11,7 +11,7 @@ class Scene;
 /**
  * @brief: 游戏的主类，管理游戏循环和场景切换，配置成单例模式
  * @note: 懒汉式单例模式，在第一次调用getInstance的时候创建唯一的静态对象
- * @note: frame_time和fps互为倒数，fsp是速度，frame_time是周期
+ * @note: frame_time和fps互为倒数，fps是速度，frame_time是周期
  * @note: frame_time用来控制游戏的绘制速度，即按照既定的帧率绘制游戏画面
  * @note: 速度参数用来控制物体的移动速度只与帧率相关，和当前的物理机器无关
  * @note: speed_arg和frame_time表示含义相同，只不过单位是(s/帧)，如果物体的移动速度是a px/s，那么这个物体一帧应该移动a * speed_arg px

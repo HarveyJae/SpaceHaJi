@@ -11,6 +11,7 @@
 
 /* 前置声明*/
 class Bullet;
+class Explosion;
 class Fighter : public GameObject
 {
 private:
@@ -33,4 +34,6 @@ public:
     bool &get_cleanFlag() { return clean_flag; }
     /* 射击*/
     std::unique_ptr<Bullet> shoot_bullet(GameObject *target, uint32_t damage);
+    /* 爆炸*/
+    std::unique_ptr<Explosion> explode();
 };

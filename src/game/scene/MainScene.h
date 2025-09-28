@@ -3,6 +3,7 @@
 #include "Fighter.h"
 #include "Enemy.h"
 #include "Bullet.h"
+#include "Explosion.h"
 #include <memory>
 #include <vector>
 #include <random>
@@ -17,6 +18,8 @@ private:
     std::vector<std::unique_ptr<Enemy>> enemys;
     /* enemy_bullet数组*/
     std::vector<std::unique_ptr<Bullet>> enemy_bullets;
+    /* explosion数组*/
+    std::vector<std::unique_ptr<Explosion>> explosions;
     /* 随机数生成器*/
     std::mt19937 gen;
     /* 随机数分布器*/
@@ -25,30 +28,24 @@ private:
     void keyboard_ctrl();
     /* enemy生成器*/
     void create_enemy();
-    /* 更新fighter*/
+    /* 更新*/
     void update_fighter();
-    /* 更新enemy*/
     void update_enemy();
-    /* 更新bullet*/
     void update_fighterBullet();
     void update_enemyBullet();
-    /* 绘制fighter*/
+    void update_explosion();
+    /* 绘制*/
     void render_fighter();
-    /* 绘制enemy*/
     void render_enemy();
-    /* 绘制bullet*/
     void render_fighterBullet();
     void render_enemyBullet();
-    /* 清除fighter*/
+    void render_explosion();
+    /* 清除*/
     void clean_fighter();
-    /* 清理enemy*/
     void clean_enemy();
-    /* 清理bullet*/
     void clean_fighterBullet();
     void clean_enemyBullet();
-    /* 爆炸*/
-    void explode_fighter(Fighter *fighter);
-    void explode_enemy(Enemy *enemy);
+    void clean_explosion();
 
 public:
     MainScene();

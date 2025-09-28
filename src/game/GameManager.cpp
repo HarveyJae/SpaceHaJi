@@ -4,7 +4,7 @@
 #include "SDL.h"
 #include "SDL_image.h"
 #include <stdint.h>
-GameManager::GameManager() : frame_time(1000 / fps), speed_arg(1.0 / fps)
+GameManager::GameManager()
 {
 }
 
@@ -56,6 +56,10 @@ void GameManager::init()
         running_flag = false;
         return;
     }
+    /* 配置帧时间*/
+    get_frameTime() = 1000 / get_fps();
+    /* 配置速度参数*/
+    get_speedArg() = 1.0 / get_fps();
     /* 创建主场景*/
     current_scene = new MainScene();
     if (current_scene == nullptr)
