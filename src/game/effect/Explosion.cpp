@@ -18,9 +18,8 @@ void Explosion::init()
     get_totalFrame() = SPACESHOOT_EXPLOSION_DEFAULT_TOTAL_FRAME;
     get_curFrame() = 0;
     /* 加载texture*/
-    SDL_Texture *texture = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_EFFECT_EXPLOSION_IMAGE_PATH);
-    get_texture() = texture;
-    SDL_QueryTexture(texture, nullptr, nullptr, &get_width(), &get_height());
+    get_texture() = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_EFFECT_EXPLOSION_IMAGE_PATH);
+    SDL_QueryTexture(get_texture(), nullptr, nullptr, &get_width(), &get_height());
     /* 设置精灵图帧尺寸*/
     get_width() = get_width() / get_totalFrame();
     get_height();

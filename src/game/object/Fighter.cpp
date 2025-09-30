@@ -21,9 +21,8 @@ void Fighter::init()
     /* 配置fighter默认伤害*/
     get_damage() = SPACESHOOT_FIGHTER_DEFAULT_DAMAGE;
     /* 加载texture*/
-    SDL_Texture *texture = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_FIGHTER_IMAGE_PATH);
-    get_texture() = texture;
-    SDL_QueryTexture(texture, nullptr, nullptr, &get_width(), &get_height());
+    get_texture() = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_FIGHTER_IMAGE_PATH);
+    SDL_QueryTexture(get_texture(), nullptr, nullptr, &get_width(), &get_height());
     /* 等比例缩放fighter图片*/
     get_width() = get_width() / 2;
     get_height() = get_height() / 2;
