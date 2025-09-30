@@ -4,6 +4,7 @@ set(
     Fighter.cpp
     Enemy.cpp
     Bullet.cpp
+    Item.cpp
 )
 
 add_library(

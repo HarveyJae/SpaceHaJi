@@ -1,0 +1,84 @@
+#include "Item.h"
+#include "SDL.h"
+#include "SDL_image.h"
+#include "GameManager.h"
+Item::Item(ItemType type) : type(type)
+{
+}
+Item::~Item()
+{
+}
+void Item::init()
+{
+    /* 类型越界检测*/
+    if (type < ItemType::None || type >= ItemType::ItemTypeMax)
+    {
+        type = ItemType::None;
+    }
+    switch (type)
+    {
+    /* 避免编译警报*/
+    case ItemType::ItemTypeMax:
+    case ItemType::None:
+        /* nothing to do*/
+        return;
+    case ItemType::Life:
+        get_texture() = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_BONUS_LIFE_IMAGE_PATH);
+        get_speed() = SPACESHOOT_BONUS_LIFE_DEFAULT_SPEED;
+        break;
+    case ItemType::Shield:
+        get_texture() = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_BONUS_SHIED_IMAGE_PATH);
+        get_speed() = SPACESHOOT_BONUS_SHIED_DEFAULT_SPEED;
+        break;
+    case ItemType::Time:
+        get_texture() = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_BONUS_TIME_IMAGE_PATH);
+        get_speed() = SPACESHOOT_BONUS_TIME_DEFAULT_SPEED;
+        break;
+    default:
+        break;
+    }
+    SDL_QueryTexture(get_texture(), nullptr, nullptr, &get_width(), &get_height());
+    /* 等比例缩放item图片*/
+    get_width() = get_width() / 4;
+    get_height() = get_height() / 4;
+    /* 定义item起始坐标*/
+    get_point().x = 0;
+    get_point().y = 0;
+}
+void Item::update()
+{
+    /* 根据速度更新坐标*/
+    get_point().y += get_direction().y * get_speed() * get_game().get_speedArg();
+    get_point().x += get_direction().x * get_speed() * get_game().get_speedArg();
+    /* 边界判断*/
+    if (get_point().y < 0 || get_point().y > get_game().get_height() || get_point().x < 0 || get_point().x > get_game().get_width())
+    {
+        /* 判断碰撞次数*/
+        if (bound_count-- < 0)
+        {
+            /* 设置dead标志，等待被清空*/
+            get_dead() = true;
+            return;
+        }
+        /* 更新方向*/
+    }
+}
+void Item::render()
+{
+    SDL_Rect Item_rect{static_cast<int>(get_point().x), static_cast<int>(get_point().y), get_width(), get_height()};
+    SDL_RenderCopy(get_game().get_renderer(), get_texture(), nullptr, &Item_rect);
+}
+void Item::clean()
+{
+    if (get_texture() != nullptr)
+    {
+        SDL_DestroyTexture(get_texture());
+    }
+}
+void Item::handle_event(SDL_Event *event)
+{
+}
+void Item::cal_direction()
+{
+    
+}
