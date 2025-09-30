@@ -62,9 +62,7 @@ std::unique_ptr<Bullet> Fighter::shoot_bullet(GameObject *target, uint32_t damag
     if (now_shootTime - last_shootTime >= cooldown_time)
     {
         /* 创建一个bullet智能指针*/
-        auto bullet = std::make_unique<Bullet>(Bullet::FIGHTER_BULLET);
-        /* 计算射击方向(fighter的target固定为nullptr)*/
-        bullet->cal_direction(this, target);
+        auto bullet = std::make_unique<Bullet>(Bullet::BulletType::Fighter, this, target);
         /* 初始化bullet*/
         bullet->init();
         /* 配置bullet伤害*/

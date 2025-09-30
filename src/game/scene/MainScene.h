@@ -49,7 +49,7 @@ private:
 
 public:
     MainScene();
-    ~MainScene();
+    ~MainScene() override;
 
     void init() override;
     void update() override;

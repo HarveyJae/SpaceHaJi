@@ -25,7 +25,7 @@ private:
 
 public:
     Enemy();
-    ~Enemy();
+    ~Enemy() override;
     void init() override;
     void update() override;
     void render() override;

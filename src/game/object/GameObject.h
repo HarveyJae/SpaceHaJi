@@ -14,6 +14,8 @@ private:
     SDL_Texture *texture = nullptr;
     /* 像素位置*/
     SDL_FPoint pos{0, 0};
+    /* 方向*/
+    SDL_FPoint direction = {0, 0};
     /* 颜色(默认为纯白)*/
     SDL_Color color{255, 255, 255, 255};
     /* 尺寸(px)*/
@@ -22,7 +24,7 @@ private:
     /* 移动速度(px/s)*/
     int speed = 0;
     /* 总生命值*/
-    int health = 0;
+    int total_health = 0;
     /* 当前生命值*/
     int current_health = 0;
     /* 伤害值*/
@@ -42,11 +44,12 @@ public:
     GameManager &get_game() { return game; }
     SDL_Texture *&get_texture() { return texture; }
     SDL_FPoint &get_point() { return pos; }
+    SDL_FPoint &get_direction() { return direction; }
     SDL_Color &get_color() { return color; }
     int &get_width() { return width; }
     int &get_height() { return height; }
     int &get_speed() { return speed; }
-    int &get_health() { return health; }
+    int &get_health() { return total_health; }
     int &get_curHealth() { return current_health; }
     int &get_damage() { return damage; }
     bool &get_active() { return active; }

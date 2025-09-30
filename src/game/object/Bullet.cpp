@@ -3,32 +3,38 @@
 #include "GameManager.h"
 #include <cmath>
 #include <cstdint>
-Bullet::Bullet(uint8_t type)
+Bullet::Bullet(BulletType type, GameObject *master, GameObject *target) : type(type), master(master), target(target)
 {
-    this->type = type;
 }
 Bullet::~Bullet()
 {
 }
 void Bullet::init()
 {
-    SDL_Texture *texture = nullptr;
-    if (type == FIGHTER_BULLET)
+    /* 类型越界检测*/
+    if (type < BulletType::None || type >= BulletType::BulletTypeMax)
     {
-        /* 配置速度*/
+        type = BulletType::None;
+    }
+    switch (type)
+    {
+    /* 避免编译警报*/
+    case BulletType::BulletTypeMax:
+    case BulletType::None:
+        /* nothing to do*/
+        return;
+    case BulletType::Fighter:
+        get_texture() = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_FIGHTER_BULLET_IMAGE_PATH);
         get_speed() = SPACESHOOT_FIGHTER_BULLET_DEFAULT_SPEED;
-        /* 加载图片*/
-        texture = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_FIGHTER_BULLET_IMAGE_PATH);
-    }
-    else if (type == ENEMY_BULLET)
-    {
-        /* 配置速度*/
+        break;
+    case BulletType::Enemy:
+        get_texture() = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_ENEMY_BULLET_IMAGE_PATH);
         get_speed() = SPACESHOOT_ENEMY_BULLET_DEFAULT_SPEED;
-        /* 加载图片*/
-        texture = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_ENEMY_BULLET_IMAGE_PATH);
+        break;
     }
-    get_texture() = texture;
-    SDL_QueryTexture(texture, nullptr, nullptr, &get_width(), &get_height());
+    /* 计算射击方向*/
+    cal_direction();
+    SDL_QueryTexture(get_texture(), nullptr, nullptr, &get_width(), &get_height());
     /* 等比例缩放*/
     get_width() = get_width() / 2;
     get_height() = get_height() / 2;
@@ -38,46 +44,59 @@ void Bullet::init()
 }
 void Bullet::update()
 {
-    if (type == FIGHTER_BULLET)
+    switch (type)
     {
+    /* 避免编译警报*/
+    case BulletType::BulletTypeMax:
+    case BulletType::None:
+        /* nothing to do*/
+        break;
+    case BulletType::Fighter:
         /* 根据速度更新坐标(不需要更新x)*/
-        get_point().y += direction.y * get_speed() * get_game().get_speedArg();
+        get_point().y += get_direction().y * get_speed() * get_game().get_speedArg();
         /* 边界判断*/
         if (get_point().y < 0)
         {
             /* 设置dead标志，等待被清空*/
             get_dead() = true;
         }
-    }
-    else if (type == ENEMY_BULLET)
-    {
+        break;
+    case BulletType::Enemy:
         /* 根据速度更新坐标*/
-        get_point().y += direction.y * get_speed() * get_game().get_speedArg();
-        get_point().x += direction.x * get_speed() * get_game().get_speedArg();
+        get_point().y += get_direction().y * get_speed() * get_game().get_speedArg();
+        get_point().x += get_direction().x * get_speed() * get_game().get_speedArg();
         /* 边界判断*/
         if (get_point().y < 0 || get_point().y > get_game().get_height() || get_point().x < 0 || get_point().x > get_game().get_width())
         {
             /* 设置dead标志，等待被清空*/
             get_dead() = true;
         }
+        break;
     }
 }
 void Bullet::render()
 {
+    /* 定义绘制dest区域*/
     SDL_Rect Bullet_rect{static_cast<int>(get_point().x), static_cast<int>(get_point().y), get_width(), get_height()};
-    /* 旋转enemy的bullet，时刻朝向fighter*/
-    if (type == ENEMY_BULLET)
+    switch (type)
     {
+    /* 避免编译警报*/
+    case BulletType::BulletTypeMax:
+    case BulletType::None:
+        /* nothing to do*/
+        break;
+    case BulletType::Fighter:
+        /* 非旋转绘制*/
+        SDL_RenderCopy(get_game().get_renderer(), get_texture(), nullptr, &Bullet_rect);
+        break;
+    case BulletType::Enemy:
         /* 计算方向角度(x轴为基准)*/
-        float angle = std::atan2(direction.y, direction.x) * 180.0 / M_PI - 90;
+        float angle = std::atan2(get_direction().y, get_direction().x) * 180.0 / M_PI - 90;
         /* 旋转中心*/
         SDL_Point center{get_width() / 2, get_height() / 2};
         /* 旋转绘制*/
         SDL_RenderCopyEx(get_game().get_renderer(), get_texture(), nullptr, &Bullet_rect, angle, &center, SDL_FLIP_NONE);
-    }
-    else
-    {
-        SDL_RenderCopy(get_game().get_renderer(), get_texture(), nullptr, &Bullet_rect);
+        break;
     }
 }
 void Bullet::clean()
@@ -90,41 +109,45 @@ void Bullet::clean()
 void Bullet::handle_event(SDL_Event *event)
 {
 }
-/**
- * @brief: bullet初始化前调用
- */
-void Bullet::cal_direction(GameObject *master, GameObject *target)
+void Bullet::cal_direction()
 {
-    if (master == nullptr || target == nullptr)
+    switch (type)
     {
-        if (type == Bullet::FIGHTER_BULLET)
+    /* 避免编译警报*/
+    case BulletType::BulletTypeMax:
+    case BulletType::None:
+        /* nothing to do*/
+        break;
+    case BulletType::Fighter:
+        /* 固定方向*/
+        get_direction().x = 0.0f;
+        get_direction().y = -1.0f;
+        break;
+    case BulletType::Enemy:
+        if (!master || !target)
         {
-            direction.x = 0.0f;
-            direction.y = -1.0f;
+            /* 固定方向*/
+            get_direction().x = 0.0f;
+            get_direction().y = 1.0f;
+            break;
         }
-        else if (type == Bullet::ENEMY_BULLET)
+        /* 计算从master中心到target中心的向量*/
+        auto x = (target->get_point().x + target->get_width() / 2) - (master->get_point().x + master->get_width() / 2);
+        auto y = (target->get_point().y + target->get_height() / 2) - (master->get_point().y + master->get_height() / 2);
+        /* 计算向量长度*/
+        auto length = std::sqrt(x * x + y * y);
+        if (length == 0.0f)
         {
-            direction.x = 0.0f;
-            direction.y = 1.0f;
+            /* master与target重叠时保持默认方向*/
+            get_direction().x = 0.0f;
+            get_direction().y = 1.0f;
         }
-        return;
+        else
+        {
+            /* 向量归一化*/
+            get_direction().x = x / length;
+            get_direction().y = y / length;
+        }
+        break;
     }
-    /* 计算从master中心到target中心的向量*/
-    auto x = (target->get_point().x + target->get_width() / 2) - (master->get_point().x + master->get_width() / 2);
-    auto y = (target->get_point().y + target->get_height() / 2) - (master->get_point().y + master->get_height() / 2);
-
-    /* 计算向量长度*/
-    auto length = std::sqrt(x * x + y * y);
-
-    if (length == 0.0f)
-    {
-        /* master 与 target 重叠时保持默认方向*/
-        direction.x = 0.0f;
-        direction.y = (type == Bullet::FIGHTER_BULLET) ? -1.0f : 1.0f;
-        return;
-    }
-
-    /* 射击方向(向量归一化)*/
-    direction.x = x / length;
-    direction.y = y / length;
 }

@@ -67,9 +67,7 @@ std::unique_ptr<Bullet> Enemy::shoot_bullet(GameObject *target, uint32_t damage)
     if (now_shootTime - last_shootTime >= cooldown_time)
     {
         /* 创建一个bullet智能指针*/
-        auto bullet = std::make_unique<Bullet>(Bullet::ENEMY_BULLET);
-        /* 计算射击方向*/
-        bullet->cal_direction(this, target);
+        auto bullet = std::make_unique<Bullet>(Bullet::BulletType::Enemy, this, target);
         /* 初始化bullet*/
         bullet->init();
         /* 配置bullet伤害*/

@@ -23,7 +23,7 @@ private:
 
 public:
     Fighter();
-    ~Fighter();
+    ~Fighter() override;
     void init() override;
     void update() override;
     void render() override;

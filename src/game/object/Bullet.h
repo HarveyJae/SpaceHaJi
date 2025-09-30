@@ -12,30 +12,34 @@ class Enemy;
 class Fighter;
 class Bullet : public GameObject
 {
+public:
+    /* 定义枚举类型*/
+    enum class BulletType
+    {
+        None = 0,
+        Fighter,
+        Enemy,
+        BulletTypeMax,
+    };
+
 private:
-    uint8_t type = NONE_BULLET;
-    /* bullet的方向*/
-    SDL_FPoint direction = {0, 0};
+    BulletType type = BulletType::None;
+    /* 射击者*/
+    GameObject *master;
+    /* 射击目标*/
+    GameObject *target;
+    /* 计算射击方向*/
+    void cal_direction();
 
 public:
-    Bullet(uint8_t type);
-    ~Bullet();
+    Bullet(BulletType type, GameObject *master, GameObject *target);
+    ~Bullet() override;
     void init() override;
     void update() override;
     void render() override;
     void clean() override;
     void handle_event(SDL_Event *event) override;
 
-    /* 计算射击方向*/
-    void cal_direction(GameObject *master, GameObject *target);
-
-    /* 定义修改器*/
-    SDL_FPoint &get_direction() { return direction; }
-    /* 定义Bullet类型*/
-    enum type
-    {
-        NONE_BULLET = 0, /* 初始值*/
-        FIGHTER_BULLET,
-        ENEMY_BULLET,
-    };
+    /* 定义访问器*/
+    BulletType &get_type() { return type; }
 };

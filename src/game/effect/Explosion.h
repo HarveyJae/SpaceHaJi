@@ -9,7 +9,7 @@ class Explosion : public GameEffect
 private:
 public:
     Explosion();
-    ~Explosion();
+    ~Explosion() override;
     virtual void init() override;
     virtual void update() override;
     virtual void render() override;
