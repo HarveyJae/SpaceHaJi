@@ -1,5 +1,6 @@
 #pragma once
 #include "SDL.h"
+#include "SDL_mixer.h"
 #include <cstdint>
 /* 前向声明*/
 class GameManager;
@@ -9,6 +10,8 @@ private:
     GameManager &game;
     /* 图片纹理*/
     SDL_Texture *texture = nullptr;
+    /* 音频对象*/
+    Mix_Music *music = nullptr;
     /* 像素位置*/
     SDL_FPoint pos{0, 0};
     /* 精灵图帧尺寸(px)*/
@@ -44,6 +47,7 @@ public:
     /* 定义访问器*/
     GameManager &get_game() { return game; }
     SDL_Texture *&get_texture() { return texture; }
+    Mix_Music *&get_music() { return music; }
     SDL_FPoint &get_point() { return pos; }
     int &get_width() { return width; }
     int &get_height() { return height; }

@@ -1,6 +1,7 @@
 #include "Explosion.h"
 #include "SDL.h"
 #include "SDL_image.h"
+#include "SDL_mixer.h"
 #include "GameManager.h"
 Explosion::Explosion()
 {
@@ -61,6 +62,11 @@ void Explosion::clean()
     if (get_texture() != nullptr)
     {
         SDL_DestroyTexture(get_texture());
+    }
+    if (get_music() != nullptr)
+    {
+        Mix_HaltMusic();
+        Mix_FreeMusic(get_music());
     }
 }
 void Explosion::handle_event(SDL_Event *event)

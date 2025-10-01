@@ -14,6 +14,17 @@ MainScene::~MainScene()
 }
 void MainScene::init()
 {
+    /* 加载背景音乐*/
+    get_music() = Mix_LoadMUS(SPACESHOOT_MAINSCENE_MUSIC_PATH);
+    /* 开启背景音乐*/
+    Mix_PlayMusic(get_music(), -1);
+    /* 读取音效资源*/
+    get_sounds().insert(std::make_pair(SPACESHOOT_FIGHTER_SHOOT_SOUND_KEY, Mix_LoadWAV(SPACESHOOT_FIGHTER_SHOOT_SOUND_PATH)));
+    get_sounds().insert(std::make_pair(SPACESHOOT_ENEMY_SHOOT_SOUND_KEY, Mix_LoadWAV(SPACESHOOT_ENEMY_SHOOT_SOUND_PATH)));
+    get_sounds().insert(std::make_pair(SPACESHOOT_FIGHTER_EXPLODE_SOUND_KEY, Mix_LoadWAV(SPACESHOOT_FIGHTER_EXPLODE_SOUND_PATH)));
+    get_sounds().insert(std::make_pair(SPACESHOOT_ENEMY_EXPLODE_SOUND_KEY, Mix_LoadWAV(SPACESHOOT_ENEMY_EXPLODE_SOUND_PATH)));
+    get_sounds().insert(std::make_pair(SPACESHOOT_HIT_SOUND_SOUND_KEY, Mix_LoadWAV(SPACESHOOT_HIT_SOUND_PATH)));
+    get_sounds().insert(std::make_pair(SPACESHOOT_FIGHTER_BONUS_SOUND_KEY, Mix_LoadWAV(SPACESHOOT_FIGHTER_BONUS_SOUND_PATH)));
     /* 初始化fighter对象*/
     fighter.init();
 }
@@ -59,6 +70,22 @@ void MainScene::clean()
     clean_item();
     /* 清除explosion*/
     clean_explosion();
+    /* 清理音效资源*/
+    for (auto &sound : get_sounds())
+    {
+        if (sound.second != nullptr)
+        {
+            Mix_FreeChunk(sound.second);
+        }
+    }
+    get_sounds().clear();
+    /* 清理音频资源*/
+    if (get_music() != nullptr)
+    {
+        Mix_HaltMusic();
+        Mix_FreeMusic(get_music());
+        get_music() = nullptr;
+    }
 }
 void MainScene::handle_event(SDL_Event *event)
 {
@@ -136,6 +163,9 @@ void MainScene::keyboard_ctrl()
         if (bullet != nullptr)
         {
             bullets.push_back(std::move(bullet));
+            /* 播放音效*/
+            auto chunk = get_sounds().at(SPACESHOOT_FIGHTER_SHOOT_SOUND_KEY);
+            Mix_PlayChannel(0, chunk, 0);
         }
     }
 }
@@ -190,6 +220,8 @@ void MainScene::update_enemy()
             if (bullet != nullptr)
             {
                 bullets.push_back(std::move(bullet));
+                auto chunk = get_sounds().at(SPACESHOOT_ENEMY_SHOOT_SOUND_KEY);
+                Mix_PlayChannel(-1, chunk, 0);
             }
             (*it)->update();
             it++;
@@ -223,11 +255,15 @@ void MainScene::update_bullet()
                 {
                     if (bullet_collisionDetection((*it).get(), enemy.get()))
                     {
+                        auto hit_chunk = get_sounds().at(SPACESHOOT_HIT_SOUND_SOUND_KEY);
+                        Mix_PlayChannel(-1, hit_chunk, 0);
                         if (enemy->get_dead())
                         {
                             /* 爆炸效果*/
                             auto explosion = enemy->explode();
                             explosions.push_back(std::move(explosion));
+                            auto chunk = get_sounds().at(SPACESHOOT_ENEMY_EXPLODE_SOUND_KEY);
+                            Mix_PlayChannel(-1, chunk, 0);
                             /* 掉落item(25%概率)*/
                             if (get_game().random() < 0.25f)
                             {
@@ -243,11 +279,15 @@ void MainScene::update_bullet()
                 /* fighter击中检测*/
                 if (bullet_collisionDetection((*it).get(), &fighter))
                 {
+                    auto hit_chunk = get_sounds().at(SPACESHOOT_HIT_SOUND_SOUND_KEY);
+                    Mix_PlayChannel(-1, hit_chunk, 0);
                     /* 爆炸效果*/
                     if (fighter.get_dead())
                     {
                         auto explosion = fighter.explode();
                         explosions.push_back(std::move(explosion));
+                        auto chunk = get_sounds().at(SPACESHOOT_FIGHTER_EXPLODE_SOUND_KEY);
+                        Mix_PlayChannel(-1, chunk, 0);
                     }
                 }
                 break;
@@ -273,6 +313,8 @@ void MainScene::update_item()
             {
                 /* fighter获取item*/
                 fighter.get_item((*it).get());
+                auto chunk = get_sounds().at(SPACESHOOT_FIGHTER_BONUS_SOUND_KEY);
+                Mix_PlayChannel(-1, chunk, 0);
             }
             (*it)->update();
             it++;

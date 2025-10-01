@@ -3,6 +3,7 @@
 #include "MainScene.h"
 #include "SDL.h"
 #include "SDL_image.h"
+#include "SDL_mixer.h"
 #include <stdint.h>
 GameManager::GameManager()
 {
@@ -62,6 +63,27 @@ void GameManager::init()
         running_flag = false;
         return;
     }
+    /* 初始化SDL_mixer*/
+    retval = Mix_Init(SPACESHOOT_MIXER_FLAG);
+    if (retval != SPACESHOOT_MIXER_FLAG)
+    {
+        std::cout << "SDL_mixer init failed, error msg: " << SDL_GetError() << std::endl;
+        running_flag = false;
+        return;
+    }
+    /* 音频开启*/
+    retval = Mix_OpenAudio(SPACESHOOT_MIXER_FREQUENCE, SPACESHOOT_MIXER_FORMAT, 2, SPACESHOOT_MIXER_MAX_VOLUME);
+    if (retval < 0)
+    {
+        std::cout << "SDL_mixer open failed, error msg: " << SDL_GetError() << std::endl;
+        running_flag = false;
+        return;
+    }
+    /* 设置音效通道数量*/
+    Mix_AllocateChannels(SPACESHOOT_MIXER_CHANNELS);
+    /* 设置音乐音量*/
+    Mix_VolumeMusic(SPACESHOOT_MIXER_MAX_VOLUME / 4);
+    Mix_Volume(-1, SPACESHOOT_MIXER_MAX_VOLUME / 8);
     /* 配置帧时间*/
     get_frameTime() = 1000 / get_fps();
     /* 配置速度参数*/
@@ -109,6 +131,8 @@ void GameManager::clean()
         /* 避免重复释放*/
         current_scene = nullptr;
     }
+    Mix_CloseAudio();
+    Mix_Quit();
     IMG_Quit();
     SDL_DestroyRenderer(renderer);
     /* 避免重复释放*/

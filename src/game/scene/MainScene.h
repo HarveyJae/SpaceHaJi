@@ -8,7 +8,19 @@
 #include <memory>
 #include <vector>
 
-
+#define SPACESHOOT_MAINSCENE_MUSIC_PATH "../assets/music/manbobo.mp3"          /* mainscene的背景音乐路径*/
+#define SPACESHOOT_FIGHTER_SHOOT_SOUND_PATH "../assets/sound/laser_shoot4.wav" /* fighter-shoot的音效路径*/
+#define SPACESHOOT_ENEMY_SHOOT_SOUND_PATH "../assets/sound/xs_laser.wav"       /* enemy-shoot的音效路径*/
+#define SPACESHOOT_FIGHTER_EXPLODE_SOUND_PATH "../assets/sound/explosion1.wav" /* fighter-explode的音效路径*/
+#define SPACESHOOT_ENEMY_EXPLODE_SOUND_PATH "../assets/sound/ohyeah.mp3"       /* enemy-explode的音效路径*/
+#define SPACESHOOT_HIT_SOUND_PATH "../assets/sound/eff11.wav"                  /* bullet-hit的音效路径*/
+#define SPACESHOOT_FIGHTER_BONUS_SOUND_PATH "../assets/sound/eff5.mp3"         /* fighter-bonus的音效路径*/
+#define SPACESHOOT_FIGHTER_SHOOT_SOUND_KEY "fighter_shoot"                     /* fighter-shoot的key值*/
+#define SPACESHOOT_ENEMY_SHOOT_SOUND_KEY "enemy_shoot"                         /* enemy-shoot的key值*/
+#define SPACESHOOT_FIGHTER_EXPLODE_SOUND_KEY "fighter_explode"                 /* fighter-explode的key值*/
+#define SPACESHOOT_ENEMY_EXPLODE_SOUND_KEY "enemy_explode"                     /* enemy-explode的key值*/
+#define SPACESHOOT_HIT_SOUND_SOUND_KEY "bullet_hit"                            /* bullet-hit的key值*/
+#define SPACESHOOT_FIGHTER_BONUS_SOUND_KEY "fighter_bonus"                     /* fighter-bonus的key值*/
 /* 前置声明*/
 class GameObject;
 class MainScene : public Scene
@@ -48,6 +60,7 @@ private:
     /* 辅助函数*/
     bool bullet_collisionDetection(Bullet *bullet, GameObject *obj);
     bool item_collisionDetection(Item *bullet, GameObject *obj);
+
 public:
     MainScene();
     ~MainScene() override;
