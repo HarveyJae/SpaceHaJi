@@ -337,6 +337,11 @@ void MainScene::clean_explosion()
  */
 bool MainScene::bullet_collisionDetection(Bullet *bullet, GameObject *obj)
 {
+    if(obj->get_dead())
+    {
+        /* 对象死亡，则跳过击中检测*/
+        return false;
+    }
     SDL_Rect Bullet_rect{
         static_cast<int>(bullet->get_point().x),
         static_cast<int>(bullet->get_point().y),

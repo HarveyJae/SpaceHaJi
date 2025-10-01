@@ -85,8 +85,9 @@ std::unique_ptr<Explosion> Fighter::explode()
     /* 设置效果尺寸*/
     explosion->get_eWidth() = get_width();
     explosion->get_eHeight() = get_height();
-    /* 定位爆炸坐标(中心点)*/
-    explosion->get_point().x = get_point().x + get_width() / 2;
-    explosion->get_point().y = get_point().y + get_height() / 2;
+    /* 定位爆炸坐标(宿主坐标)*/
+    /* 由于宿主尺寸和效果尺寸相同，因此中心点重合*/
+    explosion->get_point().x = get_point().x;
+    explosion->get_point().y = get_point().y;
     return explosion;
 }
