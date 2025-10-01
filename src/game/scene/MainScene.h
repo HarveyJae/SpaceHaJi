@@ -8,16 +8,16 @@
 #include <vector>
 #include <random>
 
+/* 前置声明*/
+class GameObject;
 class MainScene : public Scene
 {
 private:
     Fighter fighter;
-    /* fighter_bullet数组(bullet里面有引用成员，因此不可拷贝，使用智能指针)*/
-    std::vector<std::unique_ptr<Bullet>> fighter_bullets;
     /* enemy数组*/
     std::vector<std::unique_ptr<Enemy>> enemys;
-    /* enemy_bullet数组*/
-    std::vector<std::unique_ptr<Bullet>> enemy_bullets;
+    /* bullet数组*/
+    std::vector<std::unique_ptr<Bullet>> bullets;
     /* explosion数组*/
     std::vector<std::unique_ptr<Explosion>> explosions;
     /* 随机数生成器*/
@@ -31,22 +31,20 @@ private:
     /* 更新*/
     void update_fighter();
     void update_enemy();
-    void update_fighterBullet();
-    void update_enemyBullet();
+    void update_bullet();
     void update_explosion();
     /* 绘制*/
     void render_fighter();
     void render_enemy();
-    void render_fighterBullet();
-    void render_enemyBullet();
+    void render_bullet();
     void render_explosion();
     /* 清除*/
     void clean_fighter();
     void clean_enemy();
-    void clean_fighterBullet();
-    void clean_enemyBullet();
+    void clean_bullet();
     void clean_explosion();
-
+    /* 辅助函数*/
+    bool bullet_collisionDetection(Bullet *bullet, GameObject *obj);
 public:
     MainScene();
     ~MainScene() override;

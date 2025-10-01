@@ -34,8 +34,7 @@ void MainScene::update()
     /* 更新enemy*/
     update_enemy();
     /* 更新bullet*/
-    update_fighterBullet();
-    update_enemyBullet();
+    update_bullet();
     /* 更新explosion*/
     update_explosion();
 }
@@ -46,8 +45,7 @@ void MainScene::render()
     /* 绘制enemy*/
     render_enemy();
     /* 绘制bullet*/
-    render_fighterBullet();
-    render_enemyBullet();
+    render_bullet();
     /* 绘制explosion*/
     render_explosion();
 }
@@ -58,8 +56,7 @@ void MainScene::clean()
     /* 清除enemy*/
     clean_enemy();
     /* 清除bullet*/
-    clean_fighterBullet();
-    clean_enemyBullet();
+    clean_bullet();
     /* 清除explosion*/
     clean_explosion();
 }
@@ -73,11 +70,7 @@ void MainScene::handle_event(SDL_Event *event)
         enemy->handle_event(event);
     }
     /* 处理bullet事件*/
-    for (auto &bullet : fighter_bullets)
-    {
-        bullet->handle_event(event);
-    }
-    for (auto &bullet : enemy_bullets)
+    for (auto &bullet : bullets)
     {
         bullet->handle_event(event);
     }
@@ -137,7 +130,7 @@ void MainScene::keyboard_ctrl()
         auto bullet = fighter.shoot_bullet(nullptr, fighter.get_damage());
         if (bullet != nullptr)
         {
-            fighter_bullets.push_back(std::move(bullet));
+            bullets.push_back(std::move(bullet));
         }
     }
 }
@@ -192,7 +185,7 @@ void MainScene::update_enemy()
             auto bullet = (*it)->shoot_bullet(&fighter, (*it)->get_damage());
             if (bullet != nullptr)
             {
-                enemy_bullets.push_back(std::move(bullet));
+                bullets.push_back(std::move(bullet));
             }
             /* 更新enemy*/
             (*it)->update();
@@ -200,10 +193,10 @@ void MainScene::update_enemy()
         }
     }
 }
-void MainScene::update_fighterBullet()
+void MainScene::update_bullet()
 {
-    /* 更新fighter_bullet*/
-    for (auto it = fighter_bullets.begin(); it != fighter_bullets.end();)
+    /* 更新bullet*/
+    for (auto it = bullets.begin(); it != bullets.end();)
     {
         /* bullet越界*/
         if ((*it)->get_dead())
@@ -211,91 +204,56 @@ void MainScene::update_fighterBullet()
             /* 清除bullet资源*/
             (*it)->clean();
             /* 删除当前bullet*/
-            it = fighter_bullets.erase(it);
+            it = bullets.erase(it);
         }
         else
         {
-            /* 更新fighter_bullet*/
+            /* 更新bullet*/
             (*it)->update();
-            /* enemy击中检测*/
-            SDL_Rect bullet_rect{
-                static_cast<int>((*it)->get_point().x),
-                static_cast<int>((*it)->get_point().y),
-                (*it)->get_width(),
-                (*it)->get_height()};
-            for (auto &enemy : enemys)
+            /* 子弹越界死亡判断*/
+            if ((*it)->get_dead())
             {
-                SDL_Rect enemy_rect{
-                    static_cast<int>(enemy->get_point().x),
-                    static_cast<int>(enemy->get_point().y),
-                    enemy->get_width(),
-                    enemy->get_height()};
-                if (SDL_HasIntersection(&bullet_rect, &enemy_rect))
+                /* 清除bullet资源*/
+                (*it)->clean();
+                /* 删除当前bullet*/
+                it = bullets.erase(it);
+                continue;
+            }
+            switch ((*it)->get_type())
+            {
+            /* 避免编译警告*/
+            case Bullet::BulletType::BulletTypeMax:
+            case Bullet::BulletType::None:
+                /* nothing to do*/
+                break;
+            case Bullet::BulletType::Fighter:
+                /* enemy击中检测*/
+                for (auto &enemy : enemys)
                 {
-                    /* 一枚bullet只能击中一个enemy*/
-                    (*it)->get_dead() = true;
-                    /* 血量扣除*/
-                    enemy->get_curHealth() -= (*it)->get_damage();
-                    /* 血量检测*/
-                    if (enemy->get_curHealth() <= 0)
+                    if (bullet_collisionDetection((*it).get(), enemy.get()))
                     {
-                        /* dead标志*/
-                        enemy->get_dead() = true;
-                        /* hit标志*/
-                        enemy->get_hitFlag() = true;
-                        /* 爆炸*/
-                        auto explosion = enemy->explode();
+                        /* 爆炸效果*/
+                        if (enemy->get_dead())
+                        {
+                            auto explosion = enemy->explode();
+                            explosions.push_back(std::move(explosion));
+                        }
+                        break;
+                    }
+                }
+                break;
+            case Bullet::BulletType::Enemy:
+                /* fighter击中检测*/
+                if (bullet_collisionDetection((*it).get(), &fighter))
+                {
+                    /* 爆炸效果*/
+                    if (fighter.get_dead())
+                    {
+                        auto explosion = fighter.explode();
                         explosions.push_back(std::move(explosion));
                     }
-                    break;
                 }
-            }
-            it++;
-        }
-    }
-}
-void MainScene::update_enemyBullet()
-{
-    /* 更新enemy_bullet*/
-    for (auto it = enemy_bullets.begin(); it != enemy_bullets.end();)
-    {
-        if ((*it)->get_dead())
-        {
-            /* 清除bullet资源*/
-            (*it)->clean();
-            /* 删除当前bullet*/
-            it = enemy_bullets.erase(it);
-        }
-        else
-        {
-            /* 更新enemy_bullet*/
-            (*it)->update();
-            /* enemy击中检测*/
-            SDL_Rect bullet_rect{
-                static_cast<int>((*it)->get_point().x),
-                static_cast<int>((*it)->get_point().y),
-                (*it)->get_width(),
-                (*it)->get_height()};
-            SDL_Rect fighter_rect{
-                static_cast<int>(fighter.get_point().x),
-                static_cast<int>(fighter.get_point().y),
-                fighter.get_width(),
-                fighter.get_height()};
-            if (SDL_HasIntersection(&bullet_rect, &fighter_rect))
-            {
-                /* 一枚bullet只能击中一个enemy*/
-                (*it)->get_dead() = true;
-                /* 血量扣除*/
-                fighter.get_curHealth() -= (*it)->get_damage();
-                /* 血量检测*/
-                if (fighter.get_curHealth() <= 0)
-                {
-                    /* dead标志*/
-                    fighter.get_dead() = true;
-                    /* 爆炸*/
-                    auto explosion = fighter.explode();
-                    explosions.push_back(std::move(explosion));
-                }
+                break;
             }
             it++;
         }
@@ -328,16 +286,9 @@ void MainScene::render_enemy()
         enemy->render();
     }
 }
-void MainScene::render_fighterBullet()
+void MainScene::render_bullet()
 {
-    for (auto &bullet : fighter_bullets)
-    {
-        bullet->render();
-    }
-}
-void MainScene::render_enemyBullet()
-{
-    for (auto &bullet : enemy_bullets)
+    for (auto &bullet : bullets)
     {
         bullet->render();
     }
@@ -364,21 +315,13 @@ void MainScene::clean_enemy()
     }
     enemys.clear();
 }
-void MainScene::clean_fighterBullet()
+void MainScene::clean_bullet()
 {
-    for (auto &bullet : fighter_bullets)
+    for (auto &bullet : bullets)
     {
         bullet->clean();
     }
-    fighter_bullets.clear();
-}
-void MainScene::clean_enemyBullet()
-{
-    for (auto &bullet : enemy_bullets)
-    {
-        bullet->clean();
-    }
-    enemy_bullets.clear();
+    bullets.clear();
 }
 void MainScene::clean_explosion()
 {
@@ -387,4 +330,36 @@ void MainScene::clean_explosion()
         explosion->clean();
     }
     explosions.clear();
+}
+/**
+ * @brief: 子弹击中检测函数
+ * @return: true: obj被击中, false: obj没被击中
+ */
+bool MainScene::bullet_collisionDetection(Bullet *bullet, GameObject *obj)
+{
+    SDL_Rect Bullet_rect{
+        static_cast<int>(bullet->get_point().x),
+        static_cast<int>(bullet->get_point().y),
+        bullet->get_width(),
+        bullet->get_height()};
+    SDL_Rect Object_rect{
+        static_cast<int>(obj->get_point().x),
+        static_cast<int>(obj->get_point().y),
+        obj->get_width(),
+        obj->get_height()};
+    if (SDL_HasIntersection(&Bullet_rect, &Object_rect))
+    {
+        /* 一枚子弹只能击中一个对象*/
+        bullet->get_dead() = true;
+        /* 血量扣除*/
+        obj->get_curHealth() -= bullet->get_damage();
+        /* 血量检测*/
+        if (obj->get_curHealth() <= 0)
+        {
+            /* dead标志*/
+            obj->get_dead() = true;
+        }
+        return true;
+    }
+    return false;
 }
