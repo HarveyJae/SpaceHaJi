@@ -13,6 +13,7 @@
 /* 前向声明*/
 class Bullet;
 class Explosion;
+class Item;
 class Enemy : public GameObject
 {
 private:
@@ -20,8 +21,6 @@ private:
     uint32_t cooldown_time = SPACESHOOT_ENEMY_DEFAULT_COLLDOWN_TIME;
     /* 上次射击时间*/
     uint32_t last_shootTime = 0;
-    /* 击杀标志*/
-    bool hit_flag = false;
 
 public:
     Enemy();
@@ -32,10 +31,10 @@ public:
     void clean() override;
     void handle_event(SDL_Event *event) override;
 
-    /* 定义修改器*/
-    bool &get_hitFlag() { return hit_flag; }
     /* 射击*/
     std::unique_ptr<Bullet> shoot_bullet(GameObject *target, uint32_t damage);
     /* 爆炸*/
     std::unique_ptr<Explosion> explode();
+    /* 掉落物品*/
+    std::unique_ptr<Item> drop_item();
 };

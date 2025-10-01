@@ -16,12 +16,6 @@ void MainScene::init()
 {
     /* 初始化fighter对象*/
     fighter.init();
-    /* 获取随机数种子*/
-    std::random_device rd;
-    /* 初始化随机数分配器*/
-    gen = std::mt19937(rd());
-    /* 初始化随机数分布器*/
-    dis = std::uniform_real_distribution<float>(0.0f, 1.0f);
 }
 void MainScene::update()
 {
@@ -35,6 +29,8 @@ void MainScene::update()
     update_enemy();
     /* 更新bullet*/
     update_bullet();
+    /* 更新item*/
+    update_item();
     /* 更新explosion*/
     update_explosion();
 }
@@ -46,6 +42,8 @@ void MainScene::render()
     render_enemy();
     /* 绘制bullet*/
     render_bullet();
+    /* 绘制item*/
+    render_item();
     /* 绘制explosion*/
     render_explosion();
 }
@@ -57,6 +55,8 @@ void MainScene::clean()
     clean_enemy();
     /* 清除bullet*/
     clean_bullet();
+    /* 清除item*/
+    clean_item();
     /* 清除explosion*/
     clean_explosion();
 }
@@ -73,6 +73,11 @@ void MainScene::handle_event(SDL_Event *event)
     for (auto &bullet : bullets)
     {
         bullet->handle_event(event);
+    }
+    /* 处理item事件*/
+    for (auto &item : items)
+    {
+        item->handle_event(event);
     }
     /* 处理explosion事件*/
     for (auto &explosion : explosions)
@@ -137,7 +142,7 @@ void MainScene::keyboard_ctrl()
 void MainScene::create_enemy()
 {
     /* 平均1s生成一个enemy*/
-    if (dis(gen) > 1.0f / (float)(get_game().get_fps()))
+    if (get_game().random() > 1.0f / (float)(get_game().get_fps()))
     {
         return;
     }
@@ -146,7 +151,7 @@ void MainScene::create_enemy()
     /* 初始化enemy*/
     enemy->init();
     /* 定位enemy的水平坐标(随机生成)*/
-    enemy->get_point().x = dis(gen) * (get_game().get_width() - enemy->get_width());
+    enemy->get_point().x = get_game().random() * (get_game().get_width() - enemy->get_width());
     /* 定位enemy的垂直坐标(设置在屏幕上方)*/
     enemy->get_point().y = -(float)(enemy->get_height());
     /* 添加到数组中*/
@@ -180,14 +185,12 @@ void MainScene::update_enemy()
         }
         else
         {
-            /* 删除时会返回下一个迭代器，只有不删除时才更新*/
             /* enemy射击*/
             auto bullet = (*it)->shoot_bullet(&fighter, (*it)->get_damage());
             if (bullet != nullptr)
             {
                 bullets.push_back(std::move(bullet));
             }
-            /* 更新enemy*/
             (*it)->update();
             it++;
         }
@@ -195,7 +198,6 @@ void MainScene::update_enemy()
 }
 void MainScene::update_bullet()
 {
-    /* 更新bullet*/
     for (auto it = bullets.begin(); it != bullets.end();)
     {
         /* bullet越界*/
@@ -208,17 +210,6 @@ void MainScene::update_bullet()
         }
         else
         {
-            /* 更新bullet*/
-            (*it)->update();
-            /* 子弹越界死亡判断*/
-            if ((*it)->get_dead())
-            {
-                /* 清除bullet资源*/
-                (*it)->clean();
-                /* 删除当前bullet*/
-                it = bullets.erase(it);
-                continue;
-            }
             switch ((*it)->get_type())
             {
             /* 避免编译警告*/
@@ -232,11 +223,17 @@ void MainScene::update_bullet()
                 {
                     if (bullet_collisionDetection((*it).get(), enemy.get()))
                     {
-                        /* 爆炸效果*/
                         if (enemy->get_dead())
                         {
+                            /* 爆炸效果*/
                             auto explosion = enemy->explode();
                             explosions.push_back(std::move(explosion));
+                            /* 掉落item(25%概率)*/
+                            if (get_game().random() < 0.25f)
+                            {
+                                auto item = enemy->drop_item();
+                                items.push_back(std::move(item));
+                            }
                         }
                         break;
                     }
@@ -255,6 +252,29 @@ void MainScene::update_bullet()
                 }
                 break;
             }
+            (*it)->update();
+            it++;
+        }
+    }
+}
+void MainScene::update_item()
+{
+    for (auto it = items.begin(); it != items.end();)
+    {
+        if ((*it)->get_dead())
+        {
+            (*it)->clean();
+            it = items.erase(it);
+        }
+        else
+        {
+            /* 碰撞检测*/
+            if (item_collisionDetection((*it).get(), &fighter))
+            {
+                /* fighter获取item*/
+                fighter.get_item((*it).get());
+            }
+            (*it)->update();
             it++;
         }
     }
@@ -293,6 +313,13 @@ void MainScene::render_bullet()
         bullet->render();
     }
 }
+void MainScene::render_item()
+{
+    for (auto &item : items)
+    {
+        item->render();
+    }
+}
 void MainScene::render_explosion()
 {
     for (auto &explosion : explosions)
@@ -323,6 +350,14 @@ void MainScene::clean_bullet()
     }
     bullets.clear();
 }
+void MainScene::clean_item()
+{
+    for (auto &item : items)
+    {
+        item->clean();
+    }
+    items.clear();
+}
 void MainScene::clean_explosion()
 {
     for (auto &explosion : explosions)
@@ -337,7 +372,7 @@ void MainScene::clean_explosion()
  */
 bool MainScene::bullet_collisionDetection(Bullet *bullet, GameObject *obj)
 {
-    if(obj->get_dead())
+    if (obj->get_dead())
     {
         /* 对象死亡，则跳过击中检测*/
         return false;
@@ -364,6 +399,34 @@ bool MainScene::bullet_collisionDetection(Bullet *bullet, GameObject *obj)
             /* dead标志*/
             obj->get_dead() = true;
         }
+        return true;
+    }
+    return false;
+}
+/**
+ * @brief: 物品碰撞检测函数
+ * @return: true: 碰撞, false: 没碰撞
+ */
+bool MainScene::item_collisionDetection(Item *item, GameObject *obj)
+{
+    if (obj->get_dead())
+    {
+        /* 对象死亡，则跳过碰撞检测*/
+        return false;
+    }
+    SDL_Rect Item_rect{
+        static_cast<int>(item->get_point().x),
+        static_cast<int>(item->get_point().y),
+        item->get_width(),
+        item->get_height()};
+    SDL_Rect Object_rect{
+        static_cast<int>(obj->get_point().x),
+        static_cast<int>(obj->get_point().y),
+        obj->get_width(),
+        obj->get_height()};
+    if (SDL_HasIntersection(&Item_rect, &Object_rect))
+    {
+        item->get_dead() = true;
         return true;
     }
     return false;

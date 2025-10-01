@@ -6,6 +6,12 @@
 #include <stdint.h>
 GameManager::GameManager()
 {
+    /* 获取随机数种子*/
+    std::random_device rd;
+    /* 初始化随机数分配器*/
+    gen = std::mt19937(rd());
+    /* 初始化随机数分布器*/
+    dis = std::uniform_real_distribution<float>(0.0f, 1.0f);
 }
 
 GameManager::~GameManager()

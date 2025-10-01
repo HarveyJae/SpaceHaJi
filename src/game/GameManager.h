@@ -1,6 +1,7 @@
 #pragma once
 #include "SDL.h"
 #include <stdint.h>
+#include <random>
 #define SPACESHOOT_DEFAULT_FPS 60                           /* 游戏默认帧率*/
 #define SPACESHOOT_WINDOW_WIDTH_PX 600                      /* 游戏窗口宽度*/
 #define SPACESHOOT_WINDOW_HEIGHT_PX 800                     /* 游戏窗口高度*/
@@ -29,6 +30,8 @@ private:
     int height = SPACESHOOT_WINDOW_HEIGHT_PX;             /* 窗口高度*/
     SDL_Window *window = nullptr;                         /* 窗口*/
     SDL_Renderer *renderer = nullptr;                     /* 渲染器*/
+    std::mt19937 gen;                                     /* 随机数生成器*/
+    std::uniform_real_distribution<float> dis;            /* 随机数分布器*/
     GameManager();                                        /* 构造函数私有*/
     ~GameManager();                                       /* 析构函数私有*/
     GameManager(const GameManager &) = delete;            /* 禁止拷贝构造*/
@@ -47,7 +50,8 @@ public:
     void update();                       /* 更新游戏资源*/
     void render();                       /* 渲染*/
     void handle_event(SDL_Event *event); /* 事件处理*/
-    /* 访问器/修改器*/
+
+    /* 定义访问器*/
     int &get_fps() { return fps; }
     uint32_t &get_frameTime() { return frame_time; }
     float &get_speedArg() { return speed_arg; }
@@ -57,4 +61,6 @@ public:
     int &get_height() { return height; }
     SDL_Window *&get_window() { return window; }
     SDL_Renderer *&get_renderer() { return renderer; }
+    /* 全局辅助函数*/
+    float random() { return dis(gen); }
 };

@@ -3,6 +3,7 @@
 #include "Bullet.h"
 #include "Explosion.h"
 #include "GameManager.h"
+#include "Item.h"
 #include <memory>
 Enemy::Enemy()
 {
@@ -94,4 +95,30 @@ std::unique_ptr<Explosion> Enemy::explode()
     explosion->get_point().x = get_point().x;
     explosion->get_point().y = get_point().y;
     return explosion;
+}
+std::unique_ptr<Item> Enemy::drop_item()
+{
+    /* 等概率掉落*/
+    const float item_random = get_game().random();
+    Item::ItemType type = Item::ItemType::None;
+    if (item_random < 1.0 / 3.0f)
+    {
+        type = Item::ItemType::Life;
+    }
+    else if (item_random < 2.0 / 3.0f)
+    {
+        type = Item::ItemType::Shield;
+    }
+    else
+    {
+        type = Item::ItemType::Time;
+    }
+    auto item = std::make_unique<Item>(type);
+    /* 初始化item*/
+    item->init();
+    /* 设置item初始坐标(中心点)*/
+    item->get_point().x = get_point().x + get_width() / 2 - item->get_width() / 2;
+    item->get_point().y = get_point().y + get_height() / 2 - item->get_height() / 2;
+
+    return item;
 }

@@ -7,7 +7,10 @@
 #define SPACESHOOT_BONUS_LIFE_DEFAULT_SPEED 200                                     /* bonus_life的速度，200px/s*/
 #define SPACESHOOT_BONUS_SHIED_DEFAULT_SPEED 200                                    /* bonus_shield的速度，200px/s*/
 #define SPACESHOOT_BONUS_TIME_DEFAULT_SPEED 200                                     /* bonus_time的速度，200px/s*/
-class Item : GameObject
+#define SPACESHOOT_BONUS_LIFE_DEFAULT_BOUND_CNT 3                                   /* bonus_life的碰撞次数，3*/
+#define SPACESHOOT_BONUS_SHIED_DEFAULT_BOUND_CNT 2                                  /* bonus_life的碰撞次数，2*/
+#define SPACESHOOT_BONUS_TIME_DEFAULT_BOUND_CNT 2                                   /* bonus_life的碰撞次数，2*/
+class Item : public GameObject
 {
 public:
     /* 物品类型枚举定义*/
