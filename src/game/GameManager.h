@@ -1,19 +1,7 @@
 #pragma once
 #include "SDL.h"
-#include "SDL_image.h"
-#include "SDL_mixer.h"
 #include <stdint.h>
 #include <random>
-#define SPACESHOOT_DEFAULT_FPS 60                           /* 游戏默认帧率*/
-#define SPACESHOOT_WINDOW_WIDTH_PX 600                      /* 游戏窗口宽度*/
-#define SPACESHOOT_WINDOW_HEIGHT_PX 800                     /* 游戏窗口高度*/
-#define SPACESHOOT_WINDOW_TITLE_NAME "spaceshoot"           /* 游戏窗口名称*/
-#define SPACESHOOT_IMAGE_FLAG (IMG_INIT_JPG | IMG_INIT_PNG) /* 游戏支持的图片格式*/
-#define SPACESHOOT_MIXER_FLAG (MIX_INIT_MP3 | MIX_INIT_OGG) /* 游戏支持的音频格式*/
-#define SPACESHOOT_MIXER_FREQUENCE MIX_DEFAULT_FREQUENCY    /* 游戏的音频默认频率*/
-#define SPACESHOOT_MIXER_FORMAT MIX_DEFAULT_FORMAT          /* 游戏的音频默认格式*/
-#define SPACESHOOT_MIXER_CHANNELS 32                        /* 游戏的音频默认通道数*/
-#define SPACESHOOT_MIXER_MAX_VOLUME MIX_MAX_VOLUME          /* 游戏的音频默认最大音量*/
 /* 前向声明*/
 class Scene;
 /**
@@ -28,13 +16,13 @@ class Scene;
 class GameManager
 {
 private:
-    int fps = SPACESHOOT_DEFAULT_FPS;                     /* 游戏帧率(帧/s)*/
+    int fps = 0;                                          /* 游戏帧率(帧/s)*/
     uint32_t frame_time = 0;                              /* 帧时间(ms/帧)*/
     float speed_arg = 0.0;                                /* 速度参数*/
     bool running_flag = false;                            /* 游戏运行标志*/
     Scene *current_scene = nullptr;                       /* 当前活动场景*/
-    int width = SPACESHOOT_WINDOW_WIDTH_PX;               /* 窗口宽度*/
-    int height = SPACESHOOT_WINDOW_HEIGHT_PX;             /* 窗口高度*/
+    int width = 0;                                        /* 窗口宽度*/
+    int height = 0;                                       /* 窗口高度*/
     SDL_Window *window = nullptr;                         /* 窗口*/
     SDL_Renderer *renderer = nullptr;                     /* 渲染器*/
     std::mt19937 gen;                                     /* 随机数生成器*/

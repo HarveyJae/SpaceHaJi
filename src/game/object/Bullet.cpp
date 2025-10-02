@@ -3,6 +3,10 @@
 #include "GameManager.h"
 #include <cmath>
 #include <cstdint>
+#define SPACESHOOT_OBJECT_FIGHTER_BULLET_IMAGE_PATH "../assets/image/haji_bullet_fighter.png" /* fighter_bullet图片路径*/
+#define SPACESHOOT_OBJECT_ENEMY_BULLET_IMAGE_PATH "../assets/image/bullet-1.png"              /* enemy_bullet图片路径*/
+#define SPACESHOOT_FIGHTER_BULLET_DEFAULT_SPEED 400                                           /* fighter_bullet的速度，400px/s*/
+#define SPACESHOOT_ENEMY_BULLET_DEFAULT_SPEED 200                                             /* enemy_bullet的速度，200px/s*/
 Bullet::Bullet(BulletType type, GameObject *master, GameObject *target) : type(type), master(master), target(target)
 {
 }
@@ -103,7 +107,7 @@ void Bullet::render()
 }
 void Bullet::clean()
 {
-    if (get_texture() != nullptr)
+    if (get_texture())
     {
         SDL_DestroyTexture(get_texture());
     }

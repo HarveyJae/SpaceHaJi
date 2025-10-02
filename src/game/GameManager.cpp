@@ -5,7 +5,17 @@
 #include "SDL_image.h"
 #include "SDL_mixer.h"
 #include <stdint.h>
-GameManager::GameManager()
+#define SPACESHOOT_DEFAULT_FPS 60                           /* 游戏默认帧率*/
+#define SPACESHOOT_WINDOW_WIDTH_PX 600                      /* 游戏窗口宽度*/
+#define SPACESHOOT_WINDOW_HEIGHT_PX 800                     /* 游戏窗口高度*/
+#define SPACESHOOT_WINDOW_TITLE_NAME "spaceshoot"           /* 游戏窗口名称*/
+#define SPACESHOOT_IMAGE_FLAG (IMG_INIT_JPG | IMG_INIT_PNG) /* 游戏支持的图片格式*/
+#define SPACESHOOT_MIXER_FLAG (MIX_INIT_MP3 | MIX_INIT_OGG) /* 游戏支持的音频格式*/
+#define SPACESHOOT_MIXER_FREQUENCE MIX_DEFAULT_FREQUENCY    /* 游戏的音频默认频率*/
+#define SPACESHOOT_MIXER_FORMAT MIX_DEFAULT_FORMAT          /* 游戏的音频默认格式*/
+#define SPACESHOOT_MIXER_CHANNELS 32                        /* 游戏的音频默认通道数*/
+#define SPACESHOOT_MIXER_MAX_VOLUME MIX_MAX_VOLUME          /* 游戏的音频默认最大音量*/
+GameManager::GameManager() : fps(SPACESHOOT_DEFAULT_FPS), width(SPACESHOOT_WINDOW_WIDTH_PX), height(SPACESHOOT_WINDOW_HEIGHT_PX)
 {
     /* 获取随机数种子*/
     std::random_device rd;
@@ -13,6 +23,10 @@ GameManager::GameManager()
     gen = std::mt19937(rd());
     /* 初始化随机数分布器*/
     dis = std::uniform_real_distribution<float>(0.0f, 1.0f);
+    /* 配置帧时间*/
+    get_frameTime() = 1000 / get_fps();
+    /* 配置速度参数*/
+    get_speedArg() = 1.0 / get_fps();
 }
 
 GameManager::~GameManager()
@@ -84,10 +98,6 @@ void GameManager::init()
     /* 设置音乐音量*/
     Mix_VolumeMusic(SPACESHOOT_MIXER_MAX_VOLUME / 4);
     Mix_Volume(-1, SPACESHOOT_MIXER_MAX_VOLUME / 8);
-    /* 配置帧时间*/
-    get_frameTime() = 1000 / get_fps();
-    /* 配置速度参数*/
-    get_speedArg() = 1.0 / get_fps();
     /* 创建主场景*/
     current_scene = new MainScene();
     if (current_scene == nullptr)
@@ -124,7 +134,7 @@ void GameManager::run()
 }
 void GameManager::clean()
 {
-    if (current_scene != nullptr)
+    if (current_scene)
     {
         current_scene->clean();
         delete current_scene;

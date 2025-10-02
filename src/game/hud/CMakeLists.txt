@@ -1,27 +1,21 @@
 set(
-    OBJECT_SRC
-    GameObject.cpp
-    Fighter.cpp
-    Enemy.cpp
-    Bullet.cpp
-    Item.cpp
-    BkScroller.cpp
+    HUD_SRC
+    HudManager.cpp
 )
 
 add_library(
-    object
-    ${OBJECT_SRC}
+    hud
+    ${HUD_SRC}
 )
 target_include_directories(
-    object
+    hud
     PUBLIC
     ${CMAKE_SOURCE_DIR}/src/game
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 target_link_libraries(
-    object
+    hud
     PUBLIC
-    effect
     SDL2::SDL2
     SDL2_image::SDL2_image
 )

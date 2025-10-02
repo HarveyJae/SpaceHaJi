@@ -6,6 +6,7 @@ set(
 add_subdirectory(scene)
 add_subdirectory(object)
 add_subdirectory(effect)
+add_subdirectory(hud)
 # 添加库
 add_library(
     game

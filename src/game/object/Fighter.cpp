@@ -6,6 +6,11 @@
 #include "Explosion.h"
 #include "Item.h"
 #include <memory>
+#define SPACESHOOT_OBJECT_FIGHTER_IMAGE_PATH "../assets/image/haji_fighter.png" /* fighter图片路径*/
+#define SPACESHOOT_FIGHTER_DEFAULT_SPEED 300                                    /* fighter的速度，200px/s*/
+#define SPACESHOOT_FIGHTER_DEFAULT_COLLDOWN_TIME 300                            /* fighter的射击冷静时间，300ms*/
+#define SPACESHOOT_FIGHTER_DEFAULT_TOTAL_HEALTH 10                              /* fighter的总生命值*/
+#define SPACESHOOT_FIGHTER_DEFAULT_DAMAGE 2                                     /* fighter的伤害值*/
 Fighter::Fighter()
 {
 }
@@ -16,6 +21,8 @@ void Fighter::init()
 {
     /* 配置fighter默认移动速度*/
     get_speed() = SPACESHOOT_FIGHTER_DEFAULT_SPEED;
+    /* 配置fighter默认射击冷静时间*/
+    cooldown_time = SPACESHOOT_FIGHTER_DEFAULT_COLLDOWN_TIME;
     /* 配置fighter默认生命值*/
     get_health() = SPACESHOOT_FIGHTER_DEFAULT_TOTAL_HEALTH;
     get_curHealth() = SPACESHOOT_FIGHTER_DEFAULT_TOTAL_HEALTH;
@@ -43,7 +50,7 @@ void Fighter::render()
 }
 void Fighter::clean()
 {
-    if (get_texture() != nullptr)
+    if (get_texture())
     {
         SDL_DestroyTexture(get_texture());
     }

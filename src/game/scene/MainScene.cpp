@@ -1,12 +1,35 @@
 #include "MainScene.h"
-#include <SDL.h>
-#include <SDL_image.h>
+#include "SDL.h"
+#include "SDL_image.h"
 #include "GameManager.h"
 #include "Enemy.h"
+#include "BkScroller.h"
+#include "Fighter.h"
+#include "Bullet.h"
+#include "Item.h"
+#include "Explosion.h"
+#include "HudManager.h"
+#include "HudState.h"
 #include <memory>
 #include <vector>
 #include <random>
-MainScene::MainScene()
+#define SPACESHOOT_MAINSCENE_MUSIC_PATH "../assets/music/manbobo.mp3"          /* mainscene的背景音乐路径*/
+#define SPACESHOOT_FIGHTER_SHOOT_SOUND_PATH "../assets/sound/laser_shoot4.wav" /* fighter-shoot的音效路径*/
+#define SPACESHOOT_ENEMY_SHOOT_SOUND_PATH "../assets/sound/xs_laser.wav"       /* enemy-shoot的音效路径*/
+#define SPACESHOOT_FIGHTER_EXPLODE_SOUND_PATH "../assets/sound/explosion1.wav" /* fighter-explode的音效路径*/
+#define SPACESHOOT_ENEMY_EXPLODE_SOUND_PATH "../assets/sound/ohyeah.mp3"       /* enemy-explode的音效路径*/
+#define SPACESHOOT_HIT_SOUND_PATH "../assets/sound/eff11.wav"                  /* bullet-hit的音效路径*/
+#define SPACESHOOT_FIGHTER_BONUS_SOUND_PATH "../assets/sound/eff5.mp3"         /* fighter-bonus的音效路径*/
+#define SPACESHOOT_FIGHTER_SHOOT_SOUND_KEY "fighter_shoot"                     /* fighter-shoot的key值*/
+#define SPACESHOOT_ENEMY_SHOOT_SOUND_KEY "enemy_shoot"                         /* enemy-shoot的key值*/
+#define SPACESHOOT_FIGHTER_EXPLODE_SOUND_KEY "fighter_explode"                 /* fighter-explode的key值*/
+#define SPACESHOOT_ENEMY_EXPLODE_SOUND_KEY "enemy_explode"                     /* enemy-explode的key值*/
+#define SPACESHOOT_HIT_SOUND_SOUND_KEY "bullet_hit"                            /* bullet-hit的key值*/
+#define SPACESHOOT_FIGHTER_BONUS_SOUND_KEY "fighter_bonus"                     /* fighter-bonus的key值*/
+MainScene::MainScene() : fighter(std::make_unique<Fighter>()),
+                         nearStar(std::make_unique<BkScroller>(BkScroller::BkScrollerType::NearStar)),
+                         farStar(std::make_unique<BkScroller>(BkScroller::BkScrollerType::FarStar)),
+                         hud_manager(std::make_unique<HudManager>())
 {
 }
 
@@ -26,15 +49,34 @@ void MainScene::init()
     get_sounds().insert(std::make_pair(SPACESHOOT_ENEMY_EXPLODE_SOUND_KEY, Mix_LoadWAV(SPACESHOOT_ENEMY_EXPLODE_SOUND_PATH)));
     get_sounds().insert(std::make_pair(SPACESHOOT_HIT_SOUND_SOUND_KEY, Mix_LoadWAV(SPACESHOOT_HIT_SOUND_PATH)));
     get_sounds().insert(std::make_pair(SPACESHOOT_FIGHTER_BONUS_SOUND_KEY, Mix_LoadWAV(SPACESHOOT_FIGHTER_BONUS_SOUND_PATH)));
-    /* 初始化fighter对象*/
-    fighter.init();
+    /* 初始化Fighter对象*/
+    if (fighter)
+    {
+        fighter->init();
+    }
+    /* 初始化BkScroller对象*/
+    if (nearStar)
+    {
+        nearStar->init();
+    }
+    if (farStar)
+    {
+        farStar->init();
+    }
+    /* 初始化HudManager对象*/
+    if (hud_manager)
+    {
+        hud_manager->init();
+    }
 }
 void MainScene::update()
 {
     /* 场景键盘操作*/
     keyboard_ctrl();
-    /* 更新fighter帧*/
+    /* 更新fighter*/
     update_fighter();
+    /* 更新bkScroller*/
+    update_bkScroller();
     /* 按既定概率创建enemy*/
     create_enemy();
     /* 更新enemy*/
@@ -45,11 +87,15 @@ void MainScene::update()
     update_item();
     /* 更新explosion*/
     update_explosion();
+    /* 更新hud_manager*/
+    update_hudManager();
 }
 void MainScene::render()
 {
     /* 绘制fighter帧*/
     render_fighter();
+    /* 绘制bkScroller*/
+    render_bkScroller();
     /* 绘制enemy*/
     render_enemy();
     /* 绘制bullet*/
@@ -58,11 +104,15 @@ void MainScene::render()
     render_item();
     /* 绘制explosion*/
     render_explosion();
+    /* 绘制hud_manager*/
+    render_hudManager();
 }
 void MainScene::clean()
 {
     /* 清除fighter*/
     clean_fighter();
+    /* 清除bkscroller*/
+    clean_bkScroller();
     /* 清除enemy*/
     clean_enemy();
     /* 清除bullet*/
@@ -71,6 +121,8 @@ void MainScene::clean()
     clean_item();
     /* 清除explosion*/
     clean_explosion();
+    /* 清除hud_manager*/
+    clean_hudManager();
     /* 清理音效资源*/
     for (auto &sound : get_sounds())
     {
@@ -91,7 +143,10 @@ void MainScene::clean()
 void MainScene::handle_event(SDL_Event *event)
 {
     /* 处理fighter事件*/
-    fighter.handle_event(event);
+    if (fighter)
+    {
+        fighter->handle_event(event);
+    }
     /* 处理enemy事件*/
     for (auto &enemy : enemys)
     {
@@ -117,56 +172,59 @@ void MainScene::keyboard_ctrl()
 {
     /* 状态查询获取当前的键盘状态*/
     const uint8_t *keyboard_state = SDL_GetKeyboardState(nullptr);
-    if (keyboard_state[SDL_SCANCODE_W])
+    if (fighter)
     {
-        /* 控制fighter*/
-        fighter.get_point().y -= fighter.get_speed() * get_game().get_speedArg();
-        /* 限制fighter移动范围*/
-        if (fighter.get_point().y <= 0)
+        if (keyboard_state[SDL_SCANCODE_W])
         {
-            fighter.get_point().y = 0;
+            /* 控制fighter*/
+            fighter->get_point().y -= fighter->get_speed() * get_game().get_speedArg();
+            /* 限制fighter移动范围*/
+            if (fighter->get_point().y <= 0)
+            {
+                fighter->get_point().y = 0;
+            }
         }
-    }
-    if (keyboard_state[SDL_SCANCODE_A])
-    {
-        /* 控制fighter*/
-        fighter.get_point().x -= fighter.get_speed() * get_game().get_speedArg();
-        /* 限制fighter移动范围*/
-        if (fighter.get_point().x <= 0)
+        if (keyboard_state[SDL_SCANCODE_A])
         {
-            fighter.get_point().x = 0;
+            /* 控制fighter*/
+            fighter->get_point().x -= fighter->get_speed() * get_game().get_speedArg();
+            /* 限制fighter移动范围*/
+            if (fighter->get_point().x <= 0)
+            {
+                fighter->get_point().x = 0;
+            }
         }
-    }
-    if (keyboard_state[SDL_SCANCODE_S])
-    {
-        /* 控制fighter*/
-        fighter.get_point().y += fighter.get_speed() * get_game().get_speedArg();
-        /* 限制fighter移动范围*/
-        if (fighter.get_point().y >= (get_game().get_height() - fighter.get_height()))
+        if (keyboard_state[SDL_SCANCODE_S])
         {
-            fighter.get_point().y = (get_game().get_height() - fighter.get_height());
+            /* 控制fighter*/
+            fighter->get_point().y += fighter->get_speed() * get_game().get_speedArg();
+            /* 限制fighter移动范围*/
+            if (fighter->get_point().y >= (get_game().get_height() - fighter->get_height()))
+            {
+                fighter->get_point().y = (get_game().get_height() - fighter->get_height());
+            }
         }
-    }
-    if (keyboard_state[SDL_SCANCODE_D])
-    {
-        /* 控制fighter*/
-        fighter.get_point().x += fighter.get_speed() * get_game().get_speedArg();
-        /* 限制fighter移动范围*/
-        if (fighter.get_point().x >= (get_game().get_width() - fighter.get_width()))
+        if (keyboard_state[SDL_SCANCODE_D])
         {
-            fighter.get_point().x = (get_game().get_width() - fighter.get_width());
+            /* 控制fighter*/
+            fighter->get_point().x += fighter->get_speed() * get_game().get_speedArg();
+            /* 限制fighter移动范围*/
+            if (fighter->get_point().x >= (get_game().get_width() - fighter->get_width()))
+            {
+                fighter->get_point().x = (get_game().get_width() - fighter->get_width());
+            }
         }
-    }
-    if (keyboard_state[SDL_SCANCODE_SPACE])
-    {
-        /* fighter射击bullet(参数固定是nullptr)*/
-        auto bullet = fighter.shoot_bullet(nullptr, fighter.get_damage());
-        if (bullet != nullptr)
+        if (keyboard_state[SDL_SCANCODE_SPACE])
         {
-            bullets.push_back(std::move(bullet));
-            /* 播放音效*/
-            auto chunk = get_sounds().at(SPACESHOOT_FIGHTER_SHOOT_SOUND_KEY);
-            Mix_PlayChannel(0, chunk, 0);
+            /* fighter射击bullet(参数固定是nullptr)*/
+            auto bullet = fighter->shoot_bullet(nullptr, fighter->get_damage());
+            if (bullet != nullptr)
+            {
+                bullets.push_back(std::move(bullet));
+                /* 播放音效*/
+                auto chunk = get_sounds().at(SPACESHOOT_FIGHTER_SHOOT_SOUND_KEY);
+                Mix_PlayChannel(0, chunk, 0);
+            }
         }
     }
 }
@@ -202,19 +260,25 @@ void MainScene::create_enemy()
 }
 void MainScene::update_fighter()
 {
-    if (fighter.get_dead())
+    if (fighter)
     {
-        fighter.clean();
-        fighter.get_cleanFlag() = true;
-    }
-    else
-    {
-        fighter.update();
+        if (fighter->get_dead())
+        {
+            fighter->clean();
+            /* 销毁对象并滞空指针*/
+            fighter.reset();
+        }
+        else
+        {
+            fighter->update();
+        }
     }
 }
-/**
- * @todo: 在update里面添加碰撞检测
- */
+void MainScene::update_bkScroller()
+{
+    nearStar->update();
+    farStar->update();
+}
 void MainScene::update_enemy()
 {
     for (auto it = enemys.begin(); it != enemys.end();)
@@ -229,12 +293,15 @@ void MainScene::update_enemy()
         else
         {
             /* enemy射击*/
-            auto bullet = (*it)->shoot_bullet(&fighter, (*it)->get_damage());
-            if (bullet != nullptr)
+            if (fighter)
             {
-                bullets.push_back(std::move(bullet));
-                auto chunk = get_sounds().at(SPACESHOOT_ENEMY_SHOOT_SOUND_KEY);
-                Mix_PlayChannel(-1, chunk, 0);
+                auto bullet = (*it)->shoot_bullet(fighter.get(), (*it)->get_damage());
+                if (bullet)
+                {
+                    bullets.push_back(std::move(bullet));
+                    auto chunk = get_sounds().at(SPACESHOOT_ENEMY_SHOOT_SOUND_KEY);
+                    Mix_PlayChannel(-1, chunk, 0);
+                }
             }
             (*it)->update();
             it++;
@@ -290,17 +357,20 @@ void MainScene::update_bullet()
                 break;
             case Bullet::BulletType::Enemy:
                 /* fighter击中检测*/
-                if (bullet_collisionDetection((*it).get(), &fighter))
+                if (fighter)
                 {
-                    auto hit_chunk = get_sounds().at(SPACESHOOT_HIT_SOUND_SOUND_KEY);
-                    Mix_PlayChannel(-1, hit_chunk, 0);
-                    /* 爆炸效果*/
-                    if (fighter.get_dead())
+                    if (bullet_collisionDetection((*it).get(), fighter.get()))
                     {
-                        auto explosion = fighter.explode();
-                        explosions.push_back(std::move(explosion));
-                        auto chunk = get_sounds().at(SPACESHOOT_FIGHTER_EXPLODE_SOUND_KEY);
-                        Mix_PlayChannel(-1, chunk, 0);
+                        auto hit_chunk = get_sounds().at(SPACESHOOT_HIT_SOUND_SOUND_KEY);
+                        Mix_PlayChannel(-1, hit_chunk, 0);
+                        /* 爆炸效果*/
+                        if (fighter->get_dead())
+                        {
+                            auto explosion = fighter->explode();
+                            explosions.push_back(std::move(explosion));
+                            auto chunk = get_sounds().at(SPACESHOOT_FIGHTER_EXPLODE_SOUND_KEY);
+                            Mix_PlayChannel(-1, chunk, 0);
+                        }
                     }
                 }
                 break;
@@ -322,12 +392,15 @@ void MainScene::update_item()
         else
         {
             /* 碰撞检测*/
-            if (item_collisionDetection((*it).get(), &fighter))
+            if (fighter)
             {
-                /* fighter获取item*/
-                fighter.get_item((*it).get());
-                auto chunk = get_sounds().at(SPACESHOOT_FIGHTER_BONUS_SOUND_KEY);
-                Mix_PlayChannel(-1, chunk, 0);
+                if (item_collisionDetection((*it).get(), fighter.get()))
+                {
+                    /* fighter获取item*/
+                    fighter->get_item((*it).get());
+                    auto chunk = get_sounds().at(SPACESHOOT_FIGHTER_BONUS_SOUND_KEY);
+                    Mix_PlayChannel(-1, chunk, 0);
+                }
             }
             (*it)->update();
             it++;
@@ -350,9 +423,37 @@ void MainScene::update_explosion()
         }
     }
 }
+void MainScene::update_hudManager()
+{
+    /* 更新hud_state*/
+    if (fighter)
+    {
+        hud_state.total_health = fighter->get_health();
+        hud_state.current_health = fighter->get_curHealth();
+    }
+    /* 更新hud_manager*/
+    if (hud_manager)
+    {
+        hud_manager->update(hud_state);
+    }
+}
 void MainScene::render_fighter()
 {
-    fighter.render();
+    if (fighter)
+    {
+        fighter->render();
+    }
+}
+void MainScene::render_bkScroller()
+{
+    if (nearStar)
+    {
+        nearStar->render();
+    }
+    if (farStar)
+    {
+        farStar->render();
+    }
 }
 void MainScene::render_enemy()
 {
@@ -382,11 +483,29 @@ void MainScene::render_explosion()
         explosion->render();
     }
 }
+void MainScene::render_hudManager()
+{
+    if (hud_manager)
+    {
+        hud_manager->render();
+    }
+}
 void MainScene::clean_fighter()
 {
-    if (!fighter.get_cleanFlag())
+    if (fighter)
     {
-        fighter.clean();
+        fighter->clean();
+    }
+}
+void MainScene::clean_bkScroller()
+{
+    if (nearStar)
+    {
+        nearStar->clean();
+    }
+    if (farStar)
+    {
+        farStar->clean();
     }
 }
 void MainScene::clean_enemy()
@@ -420,6 +539,13 @@ void MainScene::clean_explosion()
         explosion->clean();
     }
     explosions.clear();
+}
+void MainScene::clean_hudManager()
+{
+    if (hud_manager)
+    {
+        hud_manager->clean();
+    }
 }
 /**
  * @brief: 子弹击中检测函数
