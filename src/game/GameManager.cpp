@@ -4,6 +4,7 @@
 #include "SDL.h"
 #include "SDL_image.h"
 #include "SDL_mixer.h"
+#include "SDL_ttf.h"
 #include <stdint.h>
 #define SPACESHOOT_DEFAULT_FPS 60                           /* 游戏默认帧率*/
 #define SPACESHOOT_WINDOW_WIDTH_PX 600                      /* 游戏窗口宽度*/
@@ -47,7 +48,7 @@ void GameManager::init()
     }
     /* 创建窗口*/
     window = SDL_CreateWindow(SPACESHOOT_WINDOW_TITLE_NAME, 100, 100, width, height, SDL_WINDOW_SHOWN);
-    if (window == nullptr)
+    if (!window)
     {
         std::cout << "SDL Create window failed, error msg: " << SDL_GetError() << std::endl;
         running_flag = false;
@@ -55,7 +56,7 @@ void GameManager::init()
     }
     /* 创建渲染器*/
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (renderer == nullptr)
+    if (!renderer)
     {
         std::cout << "SDL Create renderer failed, error msg: " << SDL_GetError() << std::endl;
         running_flag = false;
@@ -85,6 +86,14 @@ void GameManager::init()
         running_flag = false;
         return;
     }
+    /* 初始化SDL_ttf*/
+    retval = TTF_Init();
+    if (retval != 0)
+    {
+        std::cout << "SDL_ttf init failed, error msg: " << SDL_GetError() << std::endl;
+        running_flag = false;
+        return;
+    }
     /* 音频开启*/
     retval = Mix_OpenAudio(SPACESHOOT_MIXER_FREQUENCE, SPACESHOOT_MIXER_FORMAT, 2, SPACESHOOT_MIXER_MAX_VOLUME);
     if (retval < 0)
@@ -100,7 +109,7 @@ void GameManager::init()
     Mix_Volume(-1, SPACESHOOT_MIXER_MAX_VOLUME / 8);
     /* 创建主场景*/
     current_scene = new MainScene();
-    if (current_scene == nullptr)
+    if (!current_scene)
     {
         std::cout << "Main Scene new failed." << std::endl;
         running_flag = false;
@@ -143,6 +152,7 @@ void GameManager::clean()
     }
     Mix_CloseAudio();
     Mix_Quit();
+    TTF_Quit();
     IMG_Quit();
     SDL_DestroyRenderer(renderer);
     /* 避免重复释放*/

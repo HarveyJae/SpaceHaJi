@@ -101,6 +101,8 @@ std::unique_ptr<Explosion> Fighter::explode()
 }
 void Fighter::get_item(Item *item)
 {
+    /* 更新分数*/
+    score += 5;
     switch (item->get_type())
     {
     case Item::ItemType::ItemTypeMax:

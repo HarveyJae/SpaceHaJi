@@ -344,6 +344,11 @@ void MainScene::update_bullet()
                             explosions.push_back(std::move(explosion));
                             auto chunk = get_sounds().at(SPACESHOOT_ENEMY_EXPLODE_SOUND_KEY);
                             Mix_PlayChannel(-1, chunk, 0);
+                            /* 更新分数*/
+                            if (fighter)
+                            {
+                                fighter->get_score() += 10;
+                            }
                             /* 掉落item(25%概率)*/
                             if (get_game().random() < 0.25f)
                             {
@@ -430,6 +435,7 @@ void MainScene::update_hudManager()
     {
         hud_state.total_health = fighter->get_health();
         hud_state.current_health = fighter->get_curHealth();
+        hud_state.score = fighter->get_score();
     }
     /* 更新hud_manager*/
     if (hud_manager)

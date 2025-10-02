@@ -14,7 +14,8 @@ private:
     uint32_t cooldown_time = 0;
     /* 上次射击时间*/
     uint32_t last_shootTime = 0;
-    bool clean_flag = false;
+    /* 击杀分数*/
+    int score = 0;
 
 public:
     Fighter();
@@ -26,7 +27,7 @@ public:
     void handle_event(SDL_Event *event) override;
 
     /* 定义修改器*/
-    bool &get_cleanFlag() { return clean_flag; }
+    int &get_score() { return score; }
     /* 射击*/
     std::unique_ptr<Bullet> shoot_bullet(GameObject *target, uint32_t damage);
     /* 爆炸*/
