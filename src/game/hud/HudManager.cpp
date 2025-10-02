@@ -19,9 +19,9 @@ void HudManager::init()
     init_healthHud();
     init_scoreHud();
 }
-void HudManager::update(HudState &state)
+void HudManager::update(const HudState &hud_state)
 {
-    this->state = state;
+    state = hud_state;
     update_healthHud();
     update_scoreHud();
 }

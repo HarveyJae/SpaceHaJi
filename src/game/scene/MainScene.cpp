@@ -167,6 +167,11 @@ void MainScene::handle_event(SDL_Event *event)
     {
         explosion->handle_event(event);
     }
+    /* 处理hud_manager事件*/
+    if (hud_manager)
+    {
+        hud_manager->handle_event(event);
+    }
 }
 void MainScene::keyboard_ctrl()
 {

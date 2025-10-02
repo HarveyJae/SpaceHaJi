@@ -36,7 +36,7 @@ public:
     HudManager();
     ~HudManager();
     void init();
-    void update(HudState &state);
+    void update(const HudState &hud_state);
     void render();
     void clean();
     void handle_event(SDL_Event *event);
