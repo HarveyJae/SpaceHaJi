@@ -25,8 +25,8 @@ void Fighter::init()
     get_texture() = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_FIGHTER_IMAGE_PATH);
     SDL_QueryTexture(get_texture(), nullptr, nullptr, &get_width(), &get_height());
     /* 等比例缩放fighter图片*/
-    get_width() = get_width() / 3;
-    get_height() = get_height() / 3;
+    get_width() = get_width() / 10;
+    get_height() = get_height() / 10;
     /* 定义fighter起始坐标*/
     get_point().x = get_game().get_width() / 2 - get_width() / 2;
     get_point().y = get_game().get_height() - get_height();

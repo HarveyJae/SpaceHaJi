@@ -2,6 +2,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include "GameManager.h"
+#include "Enemy.h"
 #include <memory>
 #include <vector>
 #include <random>
@@ -176,8 +177,20 @@ void MainScene::create_enemy()
     {
         return;
     }
+    /* 等概率生成不同类型*/
+    const float enemy_random = get_game().random();
+    Enemy::EnemyType type = Enemy::EnemyType::None;
+    const int max_index = static_cast<int>(Enemy::EnemyType::EnemyTypeMax);
+    if (enemy_random < 1.0 / (float)(max_index - 1))
+    {
+        type = Enemy::EnemyType::HAJI_1;
+    }
+    else
+    {
+        type = Enemy::EnemyType::MANBO;
+    }
     /* 创建一个enemy智能指针*/
-    auto enemy = std::make_unique<Enemy>();
+    auto enemy = std::make_unique<Enemy>(type);
     /* 初始化enemy*/
     enemy->init();
     /* 定位enemy的水平坐标(随机生成)*/

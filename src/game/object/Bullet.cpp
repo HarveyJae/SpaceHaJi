@@ -25,19 +25,21 @@ void Bullet::init()
         return;
     case BulletType::Fighter:
         get_texture() = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_FIGHTER_BULLET_IMAGE_PATH);
+        SDL_QueryTexture(get_texture(), nullptr, nullptr, &get_width(), &get_height());
         get_speed() = SPACESHOOT_FIGHTER_BULLET_DEFAULT_SPEED;
+        get_width() = get_width() / 20;
+        get_height() = get_height() / 20;
         break;
     case BulletType::Enemy:
         get_texture() = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_ENEMY_BULLET_IMAGE_PATH);
+        SDL_QueryTexture(get_texture(), nullptr, nullptr, &get_width(), &get_height());
         get_speed() = SPACESHOOT_ENEMY_BULLET_DEFAULT_SPEED;
+        get_width() = get_width() / 2;
+        get_height() = get_height() / 2;
         break;
     }
     /* 计算射击方向*/
     cal_direction();
-    SDL_QueryTexture(get_texture(), nullptr, nullptr, &get_width(), &get_height());
-    /* 等比例缩放*/
-    get_width() = get_width() / 2;
-    get_height() = get_height() / 2;
     /* 定义bullet起始坐标*/
     get_point().x = 0;
     get_point().y = 0;

@@ -5,7 +5,7 @@
 #include "GameManager.h"
 #include "Item.h"
 #include <memory>
-Enemy::Enemy()
+Enemy::Enemy(EnemyType type) : type(type)
 {
 }
 Enemy::~Enemy()
@@ -13,19 +13,39 @@ Enemy::~Enemy()
 }
 void Enemy::init()
 {
+    /* 类型越界检测*/
+    if (type < EnemyType::None || type >= EnemyType::EnemyTypeMax)
+    {
+        type = EnemyType::None;
+    }
+    switch (type)
+    {
+    /* 避免编译警告*/
+    case EnemyType::EnemyTypeMax:
+    case EnemyType::None:
+        /* nothing to do*/
+        return;
+    case EnemyType::HAJI_1:
+        get_texture() = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_ENEMY_HAJI_1_IMAGE_PATH);
+        SDL_QueryTexture(get_texture(), nullptr, nullptr, &get_width(), &get_height());
+        get_width() = get_width() / 2;
+        get_height() = get_height() / 2;
+        get_health() = SPACESHOOT_ENEMY_HAJI_2_DEFAULT_TOTAL_HEALTH;
+        get_curHealth() = SPACESHOOT_ENEMY_HAJI_2_DEFAULT_TOTAL_HEALTH;
+        get_damage() = SPACESHOOT_ENEMY_HAJI_2_DEFAULT_DAMAGE;
+        break;
+    case EnemyType::MANBO:
+        get_texture() = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_ENEMY_MANBO_IMAGE_PATH);
+        SDL_QueryTexture(get_texture(), nullptr, nullptr, &get_width(), &get_height());
+        get_width() = get_width() / 2;
+        get_height() = get_height() / 2;
+        get_health() = SPACESHOOT_ENEMY_MANBO_DEFAULT_TOTAL_HEALTH;
+        get_curHealth() = SPACESHOOT_ENEMY_MANBO_DEFAULT_TOTAL_HEALTH;
+        get_damage() = SPACESHOOT_ENEMY_MANBO_DEFAULT_DAMAGE;
+        break;
+    }
     /* 配置enemy默认移动速度*/
     get_speed() = SPACESHOOT_ENEMY_DEFAULT_SPEED;
-    /* 配置enemy默认生命值*/
-    get_health() = SPACESHOOT_ENEMY_DEFAULT_TOTAL_HEALTH;
-    get_curHealth() = SPACESHOOT_ENEMY_DEFAULT_TOTAL_HEALTH;
-    /* 配置enemy默认伤害*/
-    get_damage() = SPACESHOOT_ENEMY_DEFAULT_DAMAGE;
-    /* 加载texture*/
-    get_texture() = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_ENEMY_IMAGE_PATH);
-    SDL_QueryTexture(get_texture(), nullptr, nullptr, &get_width(), &get_height());
-    /* 等比例缩放enemy图片*/
-    get_width() = get_width() / 2;
-    get_height() = get_height() / 2;
     /* 定义enemy起始坐标*/
     get_point().x = 0;
     get_point().y = 0;
@@ -101,11 +121,12 @@ std::unique_ptr<Item> Enemy::drop_item()
     /* 等概率掉落*/
     const float item_random = get_game().random();
     Item::ItemType type = Item::ItemType::None;
-    if (item_random < 1.0 / 3.0f)
+    const int max_index = static_cast<int>(Item::ItemType::ItemTypeMax);
+    if (item_random < 1.0 / (float)(max_index - 1))
     {
         type = Item::ItemType::Life;
     }
-    else if (item_random < 2.0 / 3.0f)
+    else if (item_random < 2.0 / (float)(max_index - 1))
     {
         type = Item::ItemType::Shield;
     }
