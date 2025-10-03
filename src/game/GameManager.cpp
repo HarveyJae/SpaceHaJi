@@ -1,6 +1,7 @@
 #include "GameManager.h"
 #include <iostream>
 #include "MainScene.h"
+#include "HudManager.h"
 #include "SDL.h"
 #include "SDL_image.h"
 #include "SDL_mixer.h"
@@ -107,6 +108,9 @@ void GameManager::init()
     /* 设置音乐音量*/
     Mix_VolumeMusic(SPACESHOOT_MIXER_MAX_VOLUME / 4);
     Mix_Volume(-1, SPACESHOOT_MIXER_MAX_VOLUME / 8);
+    /* 初始化hud管理器*/
+    hud = std::make_unique<HudManager>();
+    hud->init();
     /* 创建主场景*/
     current_scene = new MainScene();
     if (!current_scene)
@@ -150,6 +154,7 @@ void GameManager::clean()
         /* 避免重复释放*/
         current_scene = nullptr;
     }
+    hud->clean();
     Mix_CloseAudio();
     Mix_Quit();
     TTF_Quit();

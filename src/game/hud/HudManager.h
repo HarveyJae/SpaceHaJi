@@ -6,8 +6,20 @@
 class GameManager;
 class HudManager
 {
+public:
+    enum class HudSceneType
+    {
+        None,
+        Title,
+        Main,
+        End,
+        HudSceneTypeMax,
+    };
+
 private:
     GameManager &game;
+    /* 场景类型(决定render)*/
+    HudSceneType scene_type = HudSceneType::None;
     /* hud state*/
     HudState state;
     /* health_hud属性*/
@@ -40,4 +52,7 @@ public:
     void render();
     void clean();
     void handle_event(SDL_Event *event);
+
+    /* 辅助函数*/
+    void set_sceneType(HudSceneType type);
 };

@@ -2,8 +2,10 @@
 #include "SDL.h"
 #include <stdint.h>
 #include <random>
+#include <memory>
 /* 前向声明*/
 class Scene;
+class HudManager;
 /**
  * @brief: 游戏的主类，管理游戏循环和场景切换，配置成单例模式
  * @note: 懒汉式单例模式，在第一次调用getInstance的时候创建唯一的静态对象
@@ -27,6 +29,7 @@ private:
     SDL_Renderer *renderer = nullptr;                     /* 渲染器*/
     std::mt19937 gen;                                     /* 随机数生成器*/
     std::uniform_real_distribution<float> dis;            /* 随机数分布器*/
+    std::unique_ptr<HudManager> hud = nullptr;            /* hud管理器*/
     GameManager();                                        /* 构造函数私有*/
     ~GameManager();                                       /* 析构函数私有*/
     GameManager(const GameManager &) = delete;            /* 禁止拷贝构造*/
@@ -56,6 +59,7 @@ public:
     int &get_height() { return height; }
     SDL_Window *&get_window() { return window; }
     SDL_Renderer *&get_renderer() { return renderer; }
+    HudManager &get_hud() { return *hud; }
     /* 全局辅助函数*/
     float random() { return dis(gen); }
 };

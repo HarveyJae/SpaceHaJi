@@ -10,6 +10,7 @@
 #include "Explosion.h"
 #include "HudManager.h"
 #include "HudState.h"
+#include <iostream>
 #include <memory>
 #include <vector>
 #include <random>
@@ -28,8 +29,7 @@
 #define SPACESHOOT_FIGHTER_BONUS_SOUND_KEY "fighter_bonus"                     /* fighter-bonus的key值*/
 MainScene::MainScene() : fighter(std::make_unique<Fighter>()),
                          nearStar(std::make_unique<BkScroller>(BkScroller::BkScrollerType::NearStar)),
-                         farStar(std::make_unique<BkScroller>(BkScroller::BkScrollerType::FarStar)),
-                         hud_manager(std::make_unique<HudManager>())
+                         farStar(std::make_unique<BkScroller>(BkScroller::BkScrollerType::FarStar))
 {
 }
 
@@ -38,8 +38,15 @@ MainScene::~MainScene()
 }
 void MainScene::init()
 {
+    /* 设置hud场景类型*/
+    get_game().get_hud().set_sceneType(HudManager::HudSceneType::Main);
     /* 加载背景音乐*/
     get_music() = Mix_LoadMUS(SPACESHOOT_MAINSCENE_MUSIC_PATH);
+    if (!get_music())
+    {
+        std::cout << "MainScene music load failed, error msg: " << SDL_GetError() << std::endl;
+        return;
+    }
     /* 开启背景音乐*/
     Mix_PlayMusic(get_music(), -1);
     /* 读取音效资源*/
@@ -62,11 +69,6 @@ void MainScene::init()
     if (farStar)
     {
         farStar->init();
-    }
-    /* 初始化HudManager对象*/
-    if (hud_manager)
-    {
-        hud_manager->init();
     }
 }
 void MainScene::update()
@@ -121,8 +123,6 @@ void MainScene::clean()
     clean_item();
     /* 清除explosion*/
     clean_explosion();
-    /* 清除hud_manager*/
-    clean_hudManager();
     /* 清理音效资源*/
     for (auto &sound : get_sounds())
     {
@@ -168,10 +168,7 @@ void MainScene::handle_event(SDL_Event *event)
         explosion->handle_event(event);
     }
     /* 处理hud_manager事件*/
-    if (hud_manager)
-    {
-        hud_manager->handle_event(event);
-    }
+    get_game().get_hud().handle_event(event);
 }
 void MainScene::keyboard_ctrl()
 {
@@ -443,10 +440,7 @@ void MainScene::update_hudManager()
         hud_state.score = fighter->get_score();
     }
     /* 更新hud_manager*/
-    if (hud_manager)
-    {
-        hud_manager->update(hud_state);
-    }
+    get_game().get_hud().update(hud_state);
 }
 void MainScene::render_fighter()
 {
@@ -496,10 +490,7 @@ void MainScene::render_explosion()
 }
 void MainScene::render_hudManager()
 {
-    if (hud_manager)
-    {
-        hud_manager->render();
-    }
+    get_game().get_hud().render();
 }
 void MainScene::clean_fighter()
 {
@@ -550,13 +541,6 @@ void MainScene::clean_explosion()
         explosion->clean();
     }
     explosions.clear();
-}
-void MainScene::clean_hudManager()
-{
-    if (hud_manager)
-    {
-        hud_manager->clean();
-    }
 }
 /**
  * @brief: 子弹击中检测函数

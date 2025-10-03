@@ -14,6 +14,9 @@ HudManager::HudManager() : game(GameManager::getInstance())
 HudManager::~HudManager()
 {
 }
+/**
+ * @brief: 禁止在场景中调用，只能在GameManager中调用
+ */
 void HudManager::init()
 {
     init_healthHud();
@@ -27,9 +30,26 @@ void HudManager::update(const HudState &hud_state)
 }
 void HudManager::render()
 {
-    render_healthHud();
-    render_scoreHud();
+    switch (scene_type)
+    {
+    /* 避免编译警告*/
+    case HudSceneType::HudSceneTypeMax:
+    case HudSceneType::None:
+        /* nothing to do*/
+        break;
+    case HudSceneType::Title:
+        break;
+    case HudSceneType::Main:
+        render_healthHud();
+        render_scoreHud();
+        break;
+    case HudSceneType::End:
+        break;
+    }
 }
+/**
+ * @brief: 禁止在场景中调用，只能在GameManager中调用
+ */
 void HudManager::clean()
 {
     clean_healthHud();
@@ -37,6 +57,20 @@ void HudManager::clean()
 }
 void HudManager::handle_event(SDL_Event *event)
 {
+    switch (scene_type)
+    {
+    /* 避免编译警告*/
+    case HudSceneType::HudSceneTypeMax:
+    case HudSceneType::None:
+        /* nothing to do*/
+        break;
+    case HudSceneType::Title:
+        break;
+    case HudSceneType::Main:
+        break;
+    case HudSceneType::End:
+        break;
+    }
 }
 void HudManager::init_healthHud()
 {
@@ -131,4 +165,13 @@ void HudManager::clean_scoreHud()
         TTF_CloseFont(score_font);
         score_font = nullptr;
     }
+}
+void HudManager::set_sceneType(HudSceneType type)
+{
+    /* 类型越界检测*/
+    if (type < HudSceneType::None || type >= HudSceneType::HudSceneTypeMax)
+    {
+        type = HudSceneType::None;
+    }
+    scene_type = type;
 }

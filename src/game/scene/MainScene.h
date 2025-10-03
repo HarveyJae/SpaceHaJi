@@ -11,7 +11,6 @@ class Bullet;
 class Explosion;
 class BkScroller;
 class Item;
-class HudManager;
 class MainScene : public Scene
 {
 private:
@@ -28,8 +27,6 @@ private:
     std::vector<std::unique_ptr<Item>> items;
     /* explosion数组*/
     std::vector<std::unique_ptr<Explosion>> explosions;
-    /* HudManager对象*/
-    std::unique_ptr<HudManager> hud_manager;
     /* HudState对象*/
     HudState hud_state;
     /* 场景键盘控制*/
@@ -59,7 +56,6 @@ private:
     void clean_bullet();
     void clean_item();
     void clean_explosion();
-    void clean_hudManager();
     /* 辅助函数*/
     bool bullet_collisionDetection(Bullet *bullet, GameObject *obj);
     bool item_collisionDetection(Item *bullet, GameObject *obj);
