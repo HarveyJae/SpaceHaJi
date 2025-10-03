@@ -9,8 +9,6 @@
 #define SPACESHOOT_HUD_HEALTH_IMAGE_PATH "../assets/image/health_hud.png"      /* health_hud图片路径*/
 #define SPACESHOOT_HUD_SCORE_FONT_PATH "../assets/font/VonwaonBitmap-12px.ttf" /* score_hud字体路径*/
 #define SPACESHOOT_HUD_SCORE_FONT_SIZE 24                                      /* score_hud字体大小*/
-#define SPACESHOOT_HUD_TITLE_FONT_PATH "../assets/font/VonwaonBitmap-16px.ttf" /* title_hud字体路径*/
-#define SPACESHOOT_HUD_TITLE_FONT_SIZE 64                                      /* title_hud字体大小*/
 HudManager::HudManager() : game(GameManager::getInstance())
 {
 }
@@ -44,7 +42,6 @@ void HudManager::render()
         break;
     case HudSceneType::Title:
         render_BkScrollerHud();
-        render_titleHud();
         break;
     case HudSceneType::Main:
         render_BkScrollerHud();
@@ -63,7 +60,6 @@ void HudManager::clean()
     clean_BkScrollerHud();
     clean_healthHud();
     clean_scoreHud();
-    clean_titleHud();
 }
 void HudManager::handle_event(SDL_Event *event)
 {
@@ -196,45 +192,6 @@ void HudManager::clean_scoreHud()
     {
         TTF_CloseFont(score_font);
         score_font = nullptr;
-    }
-}
-void HudManager::init_titleHud()
-{
-    /* 初始化title_hud*/
-    title_font = TTF_OpenFont(SPACESHOOT_HUD_TITLE_FONT_PATH, SPACESHOOT_HUD_TITLE_FONT_SIZE);
-    if (!title_font)
-    {
-        std::cout << "Load title HUD font failed, error msg: " << SDL_GetError() << std::endl;
-        return;
-    }
-}
-void HudManager::update_titleHud()
-{
-    /* nothing to do*/
-}
-void HudManager::render_titleHud()
-{
-    /* 固定title*/
-    title_text = "太空哈基咪";
-    SDL_Surface *title_surface = TTF_RenderUTF8_Solid(title_font, title_text.c_str(), title_color);
-    if (!title_surface)
-    {
-        return;
-    }
-    SDL_Texture *title_texture = SDL_CreateTextureFromSurface(game.get_renderer(), title_surface);
-    title_Point.x = game.get_width() / 2 - title_surface->w / 2;
-    title_Point.y = static_cast<int>((game.get_height() - title_surface->h) * 0.4f);
-    SDL_Rect title_rect{title_Point.x, title_Point.y, title_surface->w, title_surface->h};
-    SDL_RenderCopy(game.get_renderer(), title_texture, nullptr, &title_rect);
-    SDL_DestroyTexture(title_texture);
-    SDL_FreeSurface(title_surface);
-}
-void HudManager::clean_titleHud()
-{
-    if (title_font)
-    {
-        TTF_CloseFont(title_font);
-        title_font = nullptr;
     }
 }
 void HudManager::set_sceneType(HudSceneType type)

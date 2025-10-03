@@ -1,6 +1,6 @@
 #include "GameManager.h"
 #include <iostream>
-#include "MainScene.h"
+#include "TitleScene.h"
 #include "HudManager.h"
 #include "SDL.h"
 #include "SDL_image.h"
@@ -112,7 +112,7 @@ void GameManager::init()
     hud = std::make_unique<HudManager>();
     hud->init();
     /* 创建主场景*/
-    current_scene = new MainScene();
+    current_scene = new TitleScene();
     if (!current_scene)
     {
         std::cout << "Main Scene new failed." << std::endl;

@@ -38,11 +38,6 @@ private:
     std::string score_text;
     SDL_Color score_color{255, 255, 255, 255};
     SDL_Point score_startPoint{0, 0};
-    /* title_hud属性*/
-    TTF_Font *title_font = nullptr;
-    std::string title_text;
-    SDL_Color title_color{255, 255, 255, 255};
-    SDL_Point title_Point{0, 0};
     /* BkScroller_hud方法*/
     void init_BkScrollerHud();
     void update_BkScrollerHud();
@@ -58,11 +53,6 @@ private:
     void update_scoreHud();
     void render_scoreHud();
     void clean_scoreHud();
-    /* title_hud方法*/
-    void init_titleHud();
-    void update_titleHud();
-    void render_titleHud();
-    void clean_titleHud();
 
 public:
     HudManager();
