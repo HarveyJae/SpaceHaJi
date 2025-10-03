@@ -169,12 +169,11 @@ void GameManager::clean()
 }
 void GameManager::change_scene(Scene *scene)
 {
-    if (scene == nullptr)
+    if (!scene)
     {
-        clean();
         return;
     }
-    if (current_scene != nullptr)
+    if (current_scene)
     {
         current_scene->clean();
         delete current_scene;

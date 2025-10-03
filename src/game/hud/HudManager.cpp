@@ -4,10 +4,13 @@
 #include "SDL_ttf.h"
 #include <iostream>
 #include "GameManager.h"
+#include "BkScroller.h"
 #include "HudState.h"
 #define SPACESHOOT_HUD_HEALTH_IMAGE_PATH "../assets/image/health_hud.png"      /* health_hud图片路径*/
 #define SPACESHOOT_HUD_SCORE_FONT_PATH "../assets/font/VonwaonBitmap-12px.ttf" /* score_hud字体路径*/
 #define SPACESHOOT_HUD_SCORE_FONT_SIZE 24                                      /* score_hud字体大小*/
+#define SPACESHOOT_HUD_TITLE_FONT_PATH "../assets/font/VonwaonBitmap-16px.ttf" /* title_hud字体路径*/
+#define SPACESHOOT_HUD_TITLE_FONT_SIZE 64                                      /* title_hud字体大小*/
 HudManager::HudManager() : game(GameManager::getInstance())
 {
 }
@@ -19,12 +22,14 @@ HudManager::~HudManager()
  */
 void HudManager::init()
 {
+    init_BkScrollerHud();
     init_healthHud();
     init_scoreHud();
 }
 void HudManager::update(const HudState &hud_state)
 {
     state = hud_state;
+    update_BkScrollerHud();
     update_healthHud();
     update_scoreHud();
 }
@@ -38,8 +43,11 @@ void HudManager::render()
         /* nothing to do*/
         break;
     case HudSceneType::Title:
+        render_BkScrollerHud();
+        render_titleHud();
         break;
     case HudSceneType::Main:
+        render_BkScrollerHud();
         render_healthHud();
         render_scoreHud();
         break;
@@ -52,8 +60,10 @@ void HudManager::render()
  */
 void HudManager::clean()
 {
+    clean_BkScrollerHud();
     clean_healthHud();
     clean_scoreHud();
+    clean_titleHud();
 }
 void HudManager::handle_event(SDL_Event *event)
 {
@@ -71,6 +81,28 @@ void HudManager::handle_event(SDL_Event *event)
     case HudSceneType::End:
         break;
     }
+}
+void HudManager::init_BkScrollerHud()
+{
+    nearStar = std::make_unique<BkScroller>(BkScroller::BkScrollerType::NearStar);
+    farStar = std::make_unique<BkScroller>(BkScroller::BkScrollerType::FarStar);
+    nearStar->init();
+    farStar->init();
+}
+void HudManager::update_BkScrollerHud()
+{
+    nearStar->update();
+    farStar->update();
+}
+void HudManager::render_BkScrollerHud()
+{
+    nearStar->render();
+    farStar->render();
+}
+void HudManager::clean_BkScrollerHud()
+{
+    nearStar->clean();
+    farStar->clean();
 }
 void HudManager::init_healthHud()
 {
@@ -164,6 +196,45 @@ void HudManager::clean_scoreHud()
     {
         TTF_CloseFont(score_font);
         score_font = nullptr;
+    }
+}
+void HudManager::init_titleHud()
+{
+    /* 初始化title_hud*/
+    title_font = TTF_OpenFont(SPACESHOOT_HUD_TITLE_FONT_PATH, SPACESHOOT_HUD_TITLE_FONT_SIZE);
+    if (!title_font)
+    {
+        std::cout << "Load title HUD font failed, error msg: " << SDL_GetError() << std::endl;
+        return;
+    }
+}
+void HudManager::update_titleHud()
+{
+    /* nothing to do*/
+}
+void HudManager::render_titleHud()
+{
+    /* 固定title*/
+    title_text = "太空哈基咪";
+    SDL_Surface *title_surface = TTF_RenderUTF8_Solid(title_font, title_text.c_str(), title_color);
+    if (!title_surface)
+    {
+        return;
+    }
+    SDL_Texture *title_texture = SDL_CreateTextureFromSurface(game.get_renderer(), title_surface);
+    title_Point.x = game.get_width() / 2 - title_surface->w / 2;
+    title_Point.y = static_cast<int>((game.get_height() - title_surface->h) * 0.4f);
+    SDL_Rect title_rect{title_Point.x, title_Point.y, title_surface->w, title_surface->h};
+    SDL_RenderCopy(game.get_renderer(), title_texture, nullptr, &title_rect);
+    SDL_DestroyTexture(title_texture);
+    SDL_FreeSurface(title_surface);
+}
+void HudManager::clean_titleHud()
+{
+    if (title_font)
+    {
+        TTF_CloseFont(title_font);
+        title_font = nullptr;
     }
 }
 void HudManager::set_sceneType(HudSceneType type)

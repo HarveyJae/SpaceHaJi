@@ -9,16 +9,12 @@ class Fighter;
 class Enemy;
 class Bullet;
 class Explosion;
-class BkScroller;
 class Item;
 class MainScene : public Scene
 {
 private:
     /* fighter对象*/
     std::unique_ptr<Fighter> fighter;
-    /* BkScroller对象*/
-    std::unique_ptr<BkScroller> nearStar;
-    std::unique_ptr<BkScroller> farStar;
     /* enemy数组*/
     std::vector<std::unique_ptr<Enemy>> enemys;
     /* bullet数组*/

@@ -3,7 +3,9 @@
 #include "HudState.h"
 #include "SDL_ttf.h"
 #include <string>
+#include <memory>
 class GameManager;
+class BkScroller;
 class HudManager
 {
 public:
@@ -22,6 +24,9 @@ private:
     HudSceneType scene_type = HudSceneType::None;
     /* hud state*/
     HudState state;
+    /* BkScroller_hud属性*/
+    std::unique_ptr<BkScroller> nearStar;
+    std::unique_ptr<BkScroller> farStar;
     /* health_hud属性*/
     SDL_Texture *health_texture = nullptr;
     int health_width = 0;
@@ -33,6 +38,16 @@ private:
     std::string score_text;
     SDL_Color score_color{255, 255, 255, 255};
     SDL_Point score_startPoint{0, 0};
+    /* title_hud属性*/
+    TTF_Font *title_font = nullptr;
+    std::string title_text;
+    SDL_Color title_color{255, 255, 255, 255};
+    SDL_Point title_Point{0, 0};
+    /* BkScroller_hud方法*/
+    void init_BkScrollerHud();
+    void update_BkScrollerHud();
+    void render_BkScrollerHud();
+    void clean_BkScrollerHud();
     /* health_hud方法*/
     void init_healthHud();
     void update_healthHud();
@@ -43,6 +58,11 @@ private:
     void update_scoreHud();
     void render_scoreHud();
     void clean_scoreHud();
+    /* title_hud方法*/
+    void init_titleHud();
+    void update_titleHud();
+    void render_titleHud();
+    void clean_titleHud();
 
 public:
     HudManager();

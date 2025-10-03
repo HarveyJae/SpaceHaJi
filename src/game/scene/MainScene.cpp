@@ -27,9 +27,7 @@
 #define SPACESHOOT_ENEMY_EXPLODE_SOUND_KEY "enemy_explode"                     /* enemy-explode的key值*/
 #define SPACESHOOT_HIT_SOUND_SOUND_KEY "bullet_hit"                            /* bullet-hit的key值*/
 #define SPACESHOOT_FIGHTER_BONUS_SOUND_KEY "fighter_bonus"                     /* fighter-bonus的key值*/
-MainScene::MainScene() : fighter(std::make_unique<Fighter>()),
-                         nearStar(std::make_unique<BkScroller>(BkScroller::BkScrollerType::NearStar)),
-                         farStar(std::make_unique<BkScroller>(BkScroller::BkScrollerType::FarStar))
+MainScene::MainScene() : fighter(std::make_unique<Fighter>())
 {
 }
 
@@ -61,15 +59,6 @@ void MainScene::init()
     {
         fighter->init();
     }
-    /* 初始化BkScroller对象*/
-    if (nearStar)
-    {
-        nearStar->init();
-    }
-    if (farStar)
-    {
-        farStar->init();
-    }
 }
 void MainScene::update()
 {
@@ -77,8 +66,6 @@ void MainScene::update()
     keyboard_ctrl();
     /* 更新fighter*/
     update_fighter();
-    /* 更新bkScroller*/
-    update_bkScroller();
     /* 按既定概率创建enemy*/
     create_enemy();
     /* 更新enemy*/
@@ -96,8 +83,6 @@ void MainScene::render()
 {
     /* 绘制fighter帧*/
     render_fighter();
-    /* 绘制bkScroller*/
-    render_bkScroller();
     /* 绘制enemy*/
     render_enemy();
     /* 绘制bullet*/
@@ -113,8 +98,6 @@ void MainScene::clean()
 {
     /* 清除fighter*/
     clean_fighter();
-    /* 清除bkscroller*/
-    clean_bkScroller();
     /* 清除enemy*/
     clean_enemy();
     /* 清除bullet*/
@@ -275,11 +258,6 @@ void MainScene::update_fighter()
             fighter->update();
         }
     }
-}
-void MainScene::update_bkScroller()
-{
-    nearStar->update();
-    farStar->update();
 }
 void MainScene::update_enemy()
 {
@@ -449,17 +427,6 @@ void MainScene::render_fighter()
         fighter->render();
     }
 }
-void MainScene::render_bkScroller()
-{
-    if (nearStar)
-    {
-        nearStar->render();
-    }
-    if (farStar)
-    {
-        farStar->render();
-    }
-}
 void MainScene::render_enemy()
 {
     for (auto &enemy : enemys)
@@ -497,17 +464,6 @@ void MainScene::clean_fighter()
     if (fighter)
     {
         fighter->clean();
-    }
-}
-void MainScene::clean_bkScroller()
-{
-    if (nearStar)
-    {
-        nearStar->clean();
-    }
-    if (farStar)
-    {
-        farStar->clean();
     }
 }
 void MainScene::clean_enemy()
