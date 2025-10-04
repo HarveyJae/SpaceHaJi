@@ -49,6 +49,7 @@ void HudManager::render()
         render_scoreHud();
         break;
     case HudSceneType::End:
+        render_BkScrollerHud();
         break;
     }
 }

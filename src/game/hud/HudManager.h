@@ -65,4 +65,5 @@ public:
 
     /* 辅助函数*/
     void set_sceneType(HudSceneType type);
+    HudState &get_hudState() { return state; }
 };

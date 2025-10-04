@@ -9,16 +9,20 @@
 #include "SDL_ttf.h"
 #include <stdint.h>
 #include <chrono>
-#define SPACESHOOT_DEFAULT_FPS 60                           /* 游戏默认帧率*/
-#define SPACESHOOT_WINDOW_WIDTH_PX 600                      /* 游戏窗口宽度*/
-#define SPACESHOOT_WINDOW_HEIGHT_PX 800                     /* 游戏窗口高度*/
-#define SPACESHOOT_WINDOW_TITLE_NAME "spaceshoot"           /* 游戏窗口名称*/
-#define SPACESHOOT_IMAGE_FLAG (IMG_INIT_JPG | IMG_INIT_PNG) /* 游戏支持的图片格式*/
-#define SPACESHOOT_MIXER_FLAG (MIX_INIT_MP3 | MIX_INIT_OGG) /* 游戏支持的音频格式*/
-#define SPACESHOOT_MIXER_FREQUENCE MIX_DEFAULT_FREQUENCY    /* 游戏的音频默认频率*/
-#define SPACESHOOT_MIXER_FORMAT MIX_DEFAULT_FORMAT          /* 游戏的音频默认格式*/
-#define SPACESHOOT_MIXER_CHANNELS 32                        /* 游戏的音频默认通道数*/
-#define SPACESHOOT_MIXER_MAX_VOLUME MIX_MAX_VOLUME          /* 游戏的音频默认最大音量*/
+#define SPACESHOOT_DEFAULT_FPS 60                                                /* 游戏默认帧率*/
+#define SPACESHOOT_WINDOW_WIDTH_PX 600                                           /* 游戏窗口宽度*/
+#define SPACESHOOT_WINDOW_HEIGHT_PX 800                                          /* 游戏窗口高度*/
+#define SPACESHOOT_WINDOW_TITLE_NAME "spaceshoot"                                /* 游戏窗口名称*/
+#define SPACESHOOT_IMAGE_FLAG (IMG_INIT_JPG | IMG_INIT_PNG)                      /* 游戏支持的图片格式*/
+#define SPACESHOOT_MIXER_FLAG (MIX_INIT_MP3 | MIX_INIT_OGG)                      /* 游戏支持的音频格式*/
+#define SPACESHOOT_MIXER_FREQUENCE MIX_DEFAULT_FREQUENCY                         /* 游戏的音频默认频率*/
+#define SPACESHOOT_MIXER_FORMAT MIX_DEFAULT_FORMAT                               /* 游戏的音频默认格式*/
+#define SPACESHOOT_MIXER_CHANNELS 32                                             /* 游戏的音频默认通道数*/
+#define SPACESHOOT_MIXER_MAX_VOLUME MIX_MAX_VOLUME                               /* 游戏的音频默认最大音量*/
+#define SPACESHOOT_NORMAL_TEXT_FONT_PATH "../assets/font/VonwaonBitmap-16px.ttf" /* text字体路径*/
+#define SPACESHOOT_NORMAL_TEXT_FONT_SMALL_SIZE 32                                /* text字体大小(小)*/
+#define SPACESHOOT_NORMAL_TEXT_FONT_MEDIUM_SIZE 48                               /* text字体大小(中)*/
+#define SPACESHOOT_NORMAL_TEXT_FONT_LARGE_SIZE 64                                /* text字体大小(大)*/
 GameManager::GameManager() : fps(SPACESHOOT_DEFAULT_FPS), width(SPACESHOOT_WINDOW_WIDTH_PX), height(SPACESHOOT_WINDOW_HEIGHT_PX)
 {
     /* 获取随机数种子*/
@@ -111,6 +115,28 @@ void GameManager::init()
     /* 设置音乐音量*/
     Mix_VolumeMusic(SPACESHOOT_MIXER_MAX_VOLUME / 4);
     Mix_Volume(-1, SPACESHOOT_MIXER_MAX_VOLUME / 8);
+    /* 加载通用字体*/
+    text_font_small = TTF_OpenFont(SPACESHOOT_NORMAL_TEXT_FONT_PATH, SPACESHOOT_NORMAL_TEXT_FONT_SMALL_SIZE);
+    if (!text_font_small)
+    {
+        std::cout << "Load small text font failed, error msg: " << SDL_GetError() << std::endl;
+        running_flag = false;
+        return;
+    }
+    text_font_medium = TTF_OpenFont(SPACESHOOT_NORMAL_TEXT_FONT_PATH, SPACESHOOT_NORMAL_TEXT_FONT_MEDIUM_SIZE);
+    if (!text_font_medium)
+    {
+        std::cout << "Load medium text font failed, error msg: " << SDL_GetError() << std::endl;
+        running_flag = false;
+        return;
+    }
+    text_font_large = TTF_OpenFont(SPACESHOOT_NORMAL_TEXT_FONT_PATH, SPACESHOOT_NORMAL_TEXT_FONT_LARGE_SIZE);
+    if (!text_font_large)
+    {
+        std::cout << "Load large text font failed, error msg: " << SDL_GetError() << std::endl;
+        running_flag = false;
+        return;
+    }
     /* 注册场景切换事件*/
     SDL_ChangeScene_Event = SDL_RegisterEvents(1);
     if (SDL_ChangeScene_Event == (uint32_t)-1)
@@ -160,6 +186,21 @@ void GameManager::clean()
     {
         hud->clean();
         hud.reset();
+    }
+    if (text_font_small)
+    {
+        TTF_CloseFont(text_font_small);
+        text_font_small = nullptr;
+    }
+    if (text_font_medium)
+    {
+        TTF_CloseFont(text_font_medium);
+        text_font_medium = nullptr;
+    }
+    if (text_font_large)
+    {
+        TTF_CloseFont(text_font_large);
+        text_font_large = nullptr;
     }
     Mix_CloseAudio();
     Mix_Quit();
@@ -329,4 +370,55 @@ void GameManager::handle_event(SDL_Event *event)
             current_scene->handle_event(event);
         }
     }
+}
+/**
+ * @brief: 在窗口宽度中心绘制文本
+ * @param: text: 绘制文字
+ * @param: type: 字体类型
+ * @param: color: 文字颜色
+ * @param: height_percent: 绘制文字所在的高度(百分比)
+ */
+void GameManager::RenderTextCenterW(std::string &text, NormalFontType type, SDL_Color &color, float height_percent)
+{
+    SDL_Point text_Point{0, 0};
+    SDL_Surface *text_surface = nullptr;
+    /* 类型越界检测*/
+    if (type < NormalFontType::None || type >= NormalFontType::NormalFontTypeMax)
+    {
+        type = NormalFontType::None;
+    }
+    /* 字体类型选择*/
+    switch (type)
+    {
+    /* 避免编译警告*/
+    case NormalFontType::NormalFontTypeMax:
+    case NormalFontType::None:
+        /* nothing to do*/
+        return;
+    case NormalFontType::Small:
+        text_surface = TTF_RenderUTF8_Solid(text_font_small, text.c_str(), color);
+        break;
+    case NormalFontType::Medium:
+        text_surface = TTF_RenderUTF8_Solid(text_font_medium, text.c_str(), color);
+        break;
+    case NormalFontType::Large:
+        text_surface = TTF_RenderUTF8_Solid(text_font_large, text.c_str(), color);
+        break;
+    }
+    if (!text_surface)
+    {
+        return;
+    }
+    SDL_Texture *text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+    if (!text_texture)
+    {
+        SDL_FreeSurface(text_surface);
+        return;
+    }
+    text_Point.x = width / 2 - text_surface->w / 2;
+    text_Point.y = static_cast<int>((height - text_surface->h) * height_percent);
+    SDL_Rect text_rect{text_Point.x, text_Point.y, text_surface->w, text_surface->h};
+    SDL_RenderCopy(renderer, text_texture, nullptr, &text_rect);
+    SDL_DestroyTexture(text_texture);
+    SDL_FreeSurface(text_surface);
 }

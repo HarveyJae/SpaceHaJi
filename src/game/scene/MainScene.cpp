@@ -10,6 +10,7 @@
 #include "Explosion.h"
 #include "HudManager.h"
 #include "HudState.h"
+#include "EndScene.h"
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -355,6 +356,8 @@ void MainScene::update_bullet()
                             explosions.push_back(std::move(explosion));
                             auto chunk = get_sounds().at(SPACESHOOT_FIGHTER_EXPLODE_SOUND_KEY);
                             Mix_PlayChannel(-1, chunk, 0);
+                            /* 切换到结束场景(延时2s)*/
+                            get_game().change_sceneDelay(std::make_unique<EndScene>(), 2000);
                         }
                     }
                 }
@@ -410,6 +413,8 @@ void MainScene::update_explosion()
 }
 void MainScene::update_hudManager()
 {
+    /* 获取hud_state*/
+    hud_state = get_game().get_hud().get_hudState();
     /* 更新hud_state*/
     if (fighter)
     {

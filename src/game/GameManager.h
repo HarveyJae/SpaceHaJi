@@ -1,5 +1,6 @@
 #pragma once
 #include "SDL.h"
+#include <string>
 #include <cstdint>
 #include <random>
 #include <memory>
@@ -9,6 +10,7 @@
 #include <condition_variable>
 /* 前向声明*/
 class Scene;
+class TTF_Font;
 class HudManager;
 /**
  * @brief: 游戏的主类，管理游戏循环和场景切换，配置成单例模式
@@ -21,6 +23,16 @@ class HudManager;
  */
 class GameManager
 {
+public:
+    enum class NormalFontType
+    {
+        None = 0,
+        Small,
+        Medium,
+        Large,
+        NormalFontTypeMax,
+    };
+
 private:
     /* 私有成员*/
     int fps = 0;                               /* 游戏帧率(帧/s)*/
@@ -32,6 +44,9 @@ private:
     int height = 0;                            /* 窗口高度*/
     SDL_Window *window = nullptr;              /* 窗口*/
     SDL_Renderer *renderer = nullptr;          /* 渲染器*/
+    TTF_Font *text_font_small = nullptr;       /* 通用文本字体(小)*/
+    TTF_Font *text_font_medium = nullptr;      /* 通用文本字体(中)*/
+    TTF_Font *text_font_large = nullptr;       /* 通用文本字体(大)*/
     std::mt19937 gen;                          /* 随机数生成器*/
     std::uniform_real_distribution<float> dis; /* 随机数分布器*/
     std::unique_ptr<HudManager> hud = nullptr; /* hud管理器*/
@@ -45,6 +60,7 @@ private:
     /* 私有方法*/
     void start_cs_timer_thread(uint32_t delay_ms);        /* 启动场景延时切换线程*/
     void cs_timer_thread_function(uint32_t delay_ms);     /* 场景延时线程函数*/
+    void change_sceneStop();                              /* 停止场景切换*/
     GameManager();                                        /* 构造函数私有*/
     ~GameManager();                                       /* 析构函数私有*/
     GameManager(const GameManager &) = delete;            /* 禁止拷贝构造*/
@@ -64,7 +80,6 @@ public:
     void handle_event(SDL_Event *event);                                     /* 事件处理*/
     void change_sceneNow(std::unique_ptr<Scene> scene);                      /* 切换游戏场景*/
     void change_sceneDelay(std::unique_ptr<Scene> scene, uint32_t delay_ms); /* 延时切换游戏场景*/
-    void change_sceneStop();                                                 /* 停止场景切换*/
 
     /* 定义访问器*/
     int &get_fps() { return fps; }
@@ -79,4 +94,5 @@ public:
     HudManager &get_hud() { return *hud; }
     /* 全局辅助函数*/
     float random() { return dis(gen); }
+    void RenderTextCenterW(std::string &text, NormalFontType type, SDL_Color &color, float height_percent);
 };
