@@ -3,7 +3,7 @@
 #include "HudManager.h"
 #include "HudState.h"
 #include <iostream>
-
+#define SPACESHOOT_RANK_BOARD_MAX_ITEM 8 /* 排行榜中的最大条目数量*/
 EndScene::EndScene()
 {
 }
@@ -29,6 +29,8 @@ void EndScene::init()
     timer = 0;
     /* 开启输入标志*/
     typing_flag = true;
+    /* 获取hud_state*/
+    hud_state = get_game().get_hud().get_hudState();
 }
 void EndScene::update()
 {
@@ -45,7 +47,14 @@ void EndScene::render()
     /* 渲染hud*/
     get_game().get_hud().render();
     /* 渲染结束文字*/
-    render_textTyping();
+    if (typing_flag)
+    {
+        render_textTyping();
+    }
+    else
+    {
+        render_rankBoard();
+    }
 }
 void EndScene::clean()
 {
@@ -65,12 +74,19 @@ void EndScene::handle_event(SDL_Event *event)
             {
                 typing_flag = false;
                 SDL_StopTextInput();
+                if (name.empty())
+                {
+                    /* 添加空玩家名称*/
+                    name = "None";
+                }
+                /* 插入分数排行榜*/
+                insert_rankBoard(hud_state.score, name);
             }
             if (event->key.keysym.scancode == SDL_SCANCODE_BACKSPACE)
             {
                 if (!name.empty())
                 {
-                    removeLastUTF8Char(name);
+                    remove_lastUTF8Char(name);
                 }
             }
         }
@@ -82,7 +98,6 @@ void EndScene::handle_event(SDL_Event *event)
 void EndScene::render_textTyping()
 {
     /* 渲染结束文字*/
-    hud_state = get_game().get_hud().get_hudState();
     SDL_Color color{255, 255, 255, 255};
     std::string text;
     text = "你的得分是: " + std::to_string(hud_state.score);
@@ -112,13 +127,31 @@ void EndScene::render_textTyping()
         }
     }
 }
-void EndScene::render_rank()
+void EndScene::render_rankBoard()
 {
+    std::string text = "得分榜";
+    SDL_Color color{255, 255, 255, 255};
+    get_game().RenderTextCenterW(text, GameManager::NormalFontType::Large, color, 0.1);
+    float height_percent = 0.15;
+    int i = 1;
+    for (auto item : rank_board)
+    {
+        std::string name = std::to_string(i) + ". " + item.second;
+        std::string score = std::to_string(item.first);
+        std::string text = name + "     " + score;
+        get_game().RenderTextCenterW(text, GameManager::NormalFontType::Small, color, height_percent + i * 0.05);
+        i++;
+    }
+    if (timer < 500)
+    {
+        std::string regame_text = "按 J 重新开始游戏!";
+        get_game().RenderTextCenterW(regame_text, GameManager::NormalFontType::Medium, color, 0.8);
+    }
 }
 /**
  * @brief: 正确退格utf-8字符
  */
-void EndScene::removeLastUTF8Char(std::string &str)
+void EndScene::remove_lastUTF8Char(std::string &str)
 {
     auto lastchar = str.back();
     if ((lastchar & 0b10000000) == 0b10000000)
@@ -130,4 +163,16 @@ void EndScene::removeLastUTF8Char(std::string &str)
         }
     }
     str.pop_back();
+}
+/**
+ * @brief: 插入键值对到排行榜
+ */
+void EndScene::insert_rankBoard(int score, std::string name)
+{
+    rank_board.insert({score, name});
+    if (rank_board.size() > SPACESHOOT_RANK_BOARD_MAX_ITEM)
+    {
+        auto it = std::prev(rank_board.end());
+        rank_board.erase(it);
+    }
 }
