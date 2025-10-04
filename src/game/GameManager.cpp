@@ -1,5 +1,6 @@
 #include "GameManager.h"
 #include <iostream>
+#include "Scene.h"
 #include "TitleScene.h"
 #include "HudManager.h"
 #include "SDL.h"
@@ -7,6 +8,7 @@
 #include "SDL_mixer.h"
 #include "SDL_ttf.h"
 #include <stdint.h>
+#include <chrono>
 #define SPACESHOOT_DEFAULT_FPS 60                           /* 游戏默认帧率*/
 #define SPACESHOOT_WINDOW_WIDTH_PX 600                      /* 游戏窗口宽度*/
 #define SPACESHOOT_WINDOW_HEIGHT_PX 800                     /* 游戏窗口高度*/
@@ -33,6 +35,7 @@ GameManager::GameManager() : fps(SPACESHOOT_DEFAULT_FPS), width(SPACESHOOT_WINDO
 
 GameManager::~GameManager()
 {
+    change_sceneStop();
     clean();
 }
 
@@ -108,18 +111,19 @@ void GameManager::init()
     /* 设置音乐音量*/
     Mix_VolumeMusic(SPACESHOOT_MIXER_MAX_VOLUME / 4);
     Mix_Volume(-1, SPACESHOOT_MIXER_MAX_VOLUME / 8);
+    /* 注册场景切换事件*/
+    SDL_ChangeScene_Event = SDL_RegisterEvents(1);
+    if (SDL_ChangeScene_Event == (uint32_t)-1)
+    {
+        std::cout << "SDL_Event ChangeScene register failed." << std::endl;
+        running_flag = false;
+        return;
+    }
     /* 初始化hud管理器*/
     hud = std::make_unique<HudManager>();
     hud->init();
     /* 创建主场景*/
-    current_scene = new TitleScene();
-    if (!current_scene)
-    {
-        std::cout << "Main Scene new failed." << std::endl;
-        running_flag = false;
-        return;
-    }
-    current_scene->init();
+    change_sceneNow(std::make_unique<TitleScene>());
     running_flag = true;
 }
 void GameManager::run()
@@ -150,11 +154,13 @@ void GameManager::clean()
     if (current_scene)
     {
         current_scene->clean();
-        delete current_scene;
-        /* 避免重复释放*/
-        current_scene = nullptr;
+        current_scene.reset();
     }
-    hud->clean();
+    if (hud)
+    {
+        hud->clean();
+        hud.reset();
+    }
     Mix_CloseAudio();
     Mix_Quit();
     TTF_Quit();
@@ -167,7 +173,7 @@ void GameManager::clean()
     window = nullptr;
     SDL_Quit();
 }
-void GameManager::change_scene(Scene *scene)
+void GameManager::change_sceneNow(std::unique_ptr<Scene> scene)
 {
     if (!scene)
     {
@@ -176,10 +182,92 @@ void GameManager::change_scene(Scene *scene)
     if (current_scene)
     {
         current_scene->clean();
-        delete current_scene;
     }
-    current_scene = scene;
+    current_scene = std::move(scene);
     current_scene->init();
+}
+void GameManager::change_sceneDelay(std::unique_ptr<Scene> scene, uint32_t delay_ms)
+{
+    /* 取消尚未完成的场景切换任务并回收线程资源*/
+    change_sceneStop();
+    /* 挂起待切换场景*/
+    cs_mutex.lock();
+    pending_scene = std::move(scene);
+    cs_mutex.unlock();
+
+    /* 延时为0,直接投递场景切换事件*/
+    if (delay_ms == 0)
+    {
+        SDL_Event event;
+        event.type = SDL_ChangeScene_Event;
+        if (SDL_PushEvent(&event) != 1)
+        {
+            std::cout << "Scene change event push error." << std::endl;
+        }
+        return;
+    }
+    /* 启动延时线程*/
+    start_cs_timer_thread(delay_ms);
+}
+void GameManager::start_cs_timer_thread(uint32_t delay_ms)
+{
+    cs_timer_active = true;
+    cs_timer_thread = std::thread(&GameManager::cs_timer_thread_function, this, delay_ms);
+}
+void GameManager::cs_timer_thread_function(uint32_t delay_ms)
+{
+    const std::chrono::steady_clock::time_point dead_time = std::chrono::steady_clock::now() + std::chrono::milliseconds(delay_ms);
+    std::unique_lock<std::mutex> cv_lock(cs_mutex);
+    bool t_cancel_flag = cs_cv.wait_until(cv_lock, dead_time, [this]
+                                          { return cs_stop_flag; });
+    cv_lock.unlock();
+
+    /* 检测是否已被外部取消或析构*/
+    if (!cs_timer_active.load())
+    {
+        return;
+    }
+    /* 检测是否提前唤醒*/
+    if (t_cancel_flag)
+    {
+        return;
+    }
+    /* 时间到，发送场景切换事件*/
+    SDL_Event event;
+    event.type = SDL_ChangeScene_Event;
+    if (SDL_PushEvent(&event) < 0)
+    {
+        std::cout << "SDL_Event ChangeScene register failed." << std::endl;
+    }
+}
+void GameManager::change_sceneStop()
+{
+    /* 设置取消标记并判断是否存在活跃计时器，存在则唤醒计时线程*/
+    if (cs_timer_active.exchange(false))
+    {
+        /* 设置取消场景切换标志*/
+        cs_mutex.lock();
+        cs_stop_flag = true;
+        cs_mutex.unlock();
+
+        /* 唤醒计时线程的wait_until*/
+        cs_cv.notify_all();
+
+        /* 等待计时线程退出*/
+        if (cs_timer_thread.joinable())
+        {
+            cs_timer_thread.join();
+        }
+        /* 清理等待切换的挂起场景*/
+        cs_mutex.lock();
+        pending_scene.reset();
+        cs_mutex.unlock();
+
+        /* 恢复取消场景切换标志*/
+        cs_mutex.lock();
+        cs_stop_flag = false;
+        cs_mutex.unlock();
+    }
 }
 void GameManager::update()
 {
@@ -210,6 +298,30 @@ void GameManager::handle_event(SDL_Event *event)
         if (event->type == SDL_QUIT)
         {
             running_flag = false;
+        }
+        /* 场景切换事件*/
+        if (event->type == SDL_ChangeScene_Event)
+        {
+            /* 清理线程资源*/
+            if (cs_timer_active.exchange(false))
+            {
+                if (cs_timer_thread.joinable())
+                {
+                    cs_timer_thread.join();
+                }
+            }
+            /* 切换挂起场景*/
+            std::unique_ptr<Scene> next_scene;
+            cs_mutex.lock();
+            if (pending_scene)
+            {
+                next_scene = std::move(pending_scene);
+            }
+            cs_mutex.unlock();
+            if (next_scene)
+            {
+                change_sceneNow(std::move(next_scene));
+            }
         }
         /* 处理场景事件*/
         if (current_scene != nullptr)

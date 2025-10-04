@@ -11,7 +11,7 @@ class HudManager
 public:
     enum class HudSceneType
     {
-        None,
+        None = 0,
         Title,
         Main,
         End,

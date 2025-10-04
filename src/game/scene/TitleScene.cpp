@@ -112,8 +112,7 @@ void TitleScene::handle_event(SDL_Event *event)
     {
         if (event->key.keysym.scancode == SDL_SCANCODE_J)
         {
-            Scene *main_scene = new MainScene();
-            get_game().change_scene(main_scene);
+            get_game().change_sceneNow(std::make_unique<MainScene>());
         }
     }
 }
