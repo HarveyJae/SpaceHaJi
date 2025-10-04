@@ -34,7 +34,6 @@ private:
     SDL_Point health_startPoint{0, 0};
     int health_offset = 0;
     /* score_hud属性*/
-    TTF_Font *score_font = nullptr;
     std::string score_text;
     SDL_Color score_color{255, 255, 255, 255};
     SDL_Point score_startPoint{0, 0};

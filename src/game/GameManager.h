@@ -94,5 +94,6 @@ public:
     HudManager &get_hud() { return *hud; }
     /* 全局辅助函数*/
     float random() { return dis(gen); }
-    void RenderTextCenterW(std::string &text, NormalFontType type, SDL_Color &color, float height_percent);
+    SDL_Point RenderTextCenterW(std::string &text, NormalFontType type, SDL_Color &color, float height_percent);
+    void RenderTextPoint(std::string &text, NormalFontType type, SDL_Color &color, SDL_Point &point);
 };

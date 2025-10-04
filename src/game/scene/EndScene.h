@@ -13,7 +13,8 @@ private:
     bool typing_flag = false;
     /* HudState对象*/
     HudState hud_state;
-
+    /* 控制字符闪烁的定时器*/
+    uint32_t timer = 0;
     /* 私有方法*/
     void render_textTyping();
     void render_rank();

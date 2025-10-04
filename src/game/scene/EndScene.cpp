@@ -25,11 +25,20 @@ void EndScene::init()
         std::cout << "EndScene text input open failed, error msg: " << SDL_GetError() << std::endl;
         return;
     }
+    /* 初始化定时器*/
+    timer = 0;
     /* 开启输入标志*/
     typing_flag = true;
 }
 void EndScene::update()
 {
+    get_game().get_hud().update(hud_state);
+    /* 更新计时器(循环计时1000ms)*/
+    timer += get_game().get_frameTime();
+    if (timer >= 1000)
+    {
+        timer = 0;
+    }
 }
 void EndScene::render()
 {
@@ -81,12 +90,26 @@ void EndScene::render_textTyping()
     text = "Game Over";
     get_game().RenderTextCenterW(text, GameManager::NormalFontType::Medium, color, 0.4);
     text = "请输入你的名字, 按回车键退出: ";
-    get_game().RenderTextCenterW(text, GameManager::NormalFontType::Small, color, 0.5);
+    SDL_Point text_point = get_game().RenderTextCenterW(text, GameManager::NormalFontType::Small, color, 0.5);
 
+    std::string cursor_text = "_";
     /* 渲染用户输入名称*/
     if (!name.empty())
     {
-        get_game().RenderTextCenterW(name, GameManager::NormalFontType::Small, color, 0.6);
+        SDL_Point name_point = get_game().RenderTextCenterW(name, GameManager::NormalFontType::Small, color, 0.6);
+        if (timer < 500)
+        {
+            /* 闪烁绘制光标*/
+            get_game().RenderTextPoint(cursor_text, GameManager::NormalFontType::Small, color, name_point);
+        }
+    }
+    else
+    {
+        if (timer < 500)
+        {
+            /* 闪烁绘制光标*/
+            get_game().RenderTextPoint(cursor_text, GameManager::NormalFontType::Small, color, text_point);
+        }
     }
 }
 void EndScene::render_rank()

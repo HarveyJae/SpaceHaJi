@@ -377,10 +377,63 @@ void GameManager::handle_event(SDL_Event *event)
  * @param: type: 字体类型
  * @param: color: 文字颜色
  * @param: height_percent: 绘制文字所在的高度(百分比)
+ * @return: 文本末尾坐标
  */
-void GameManager::RenderTextCenterW(std::string &text, NormalFontType type, SDL_Color &color, float height_percent)
+SDL_Point GameManager::RenderTextCenterW(std::string &text, NormalFontType type, SDL_Color &color, float height_percent)
 {
     SDL_Point text_Point{0, 0};
+    SDL_Surface *text_surface = nullptr;
+    /* 类型越界检测*/
+    if (type < NormalFontType::None || type >= NormalFontType::NormalFontTypeMax)
+    {
+        type = NormalFontType::None;
+    }
+    /* 字体类型选择*/
+    switch (type)
+    {
+    /* 避免编译警告*/
+    case NormalFontType::NormalFontTypeMax:
+    case NormalFontType::None:
+        /* nothing to do*/
+        return {0, 0};
+    case NormalFontType::Small:
+        text_surface = TTF_RenderUTF8_Solid(text_font_small, text.c_str(), color);
+        break;
+    case NormalFontType::Medium:
+        text_surface = TTF_RenderUTF8_Solid(text_font_medium, text.c_str(), color);
+        break;
+    case NormalFontType::Large:
+        text_surface = TTF_RenderUTF8_Solid(text_font_large, text.c_str(), color);
+        break;
+    }
+    if (!text_surface)
+    {
+        return {0, 0};
+    }
+    SDL_Texture *text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+    if (!text_texture)
+    {
+        SDL_FreeSurface(text_surface);
+        return {0, 0};
+    }
+    text_Point.x = width / 2 - text_surface->w / 2;
+    text_Point.y = static_cast<int>((height - text_surface->h) * height_percent);
+    SDL_Rect text_rect{text_Point.x, text_Point.y, text_surface->w, text_surface->h};
+    SDL_RenderCopy(renderer, text_texture, nullptr, &text_rect);
+    SDL_DestroyTexture(text_texture);
+    SDL_FreeSurface(text_surface);
+    /* 返回绘制字体的结束坐标*/
+    return {text_rect.x + text_rect.w, text_rect.y};
+}
+/**
+ * @brief: 在窗口的任意坐标绘制文本
+ * @param: text: 绘制文字
+ * @param: type: 字体类型
+ * @param: color: 文本颜色
+ * @param: point: 绘制文本的起始坐标
+ */
+void GameManager::RenderTextPoint(std::string &text, NormalFontType type, SDL_Color &color, SDL_Point &point)
+{
     SDL_Surface *text_surface = nullptr;
     /* 类型越界检测*/
     if (type < NormalFontType::None || type >= NormalFontType::NormalFontTypeMax)
@@ -415,9 +468,7 @@ void GameManager::RenderTextCenterW(std::string &text, NormalFontType type, SDL_
         SDL_FreeSurface(text_surface);
         return;
     }
-    text_Point.x = width / 2 - text_surface->w / 2;
-    text_Point.y = static_cast<int>((height - text_surface->h) * height_percent);
-    SDL_Rect text_rect{text_Point.x, text_Point.y, text_surface->w, text_surface->h};
+    SDL_Rect text_rect{point.x, point.y, text_surface->w, text_surface->h};
     SDL_RenderCopy(renderer, text_texture, nullptr, &text_rect);
     SDL_DestroyTexture(text_texture);
     SDL_FreeSurface(text_surface);
