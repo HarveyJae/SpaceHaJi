@@ -17,6 +17,7 @@ private:
     /* 私有方法*/
     void render_textTyping();
     void render_rank();
+    void removeLastUTF8Char(std::string& str);
 
 public:
     EndScene();

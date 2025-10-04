@@ -61,7 +61,7 @@ void EndScene::handle_event(SDL_Event *event)
             {
                 if (!name.empty())
                 {
-                    name.pop_back();
+                    removeLastUTF8Char(name);
                 }
             }
         }
@@ -91,4 +91,20 @@ void EndScene::render_textTyping()
 }
 void EndScene::render_rank()
 {
+}
+/**
+ * @brief: 正确退格utf-8字符
+ */
+void EndScene::removeLastUTF8Char(std::string &str)
+{
+    auto lastchar = str.back();
+    if ((lastchar & 0b10000000) == 0b10000000)
+    {
+        str.pop_back();
+        while ((str.back() & 0b11000000) != 0b11000000)
+        {
+            str.pop_back();
+        }
+    }
+    str.pop_back();
 }
