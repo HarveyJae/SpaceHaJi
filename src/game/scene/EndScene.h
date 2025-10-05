@@ -10,6 +10,8 @@ class EndScene : public Scene
 private:
     /* 玩家名称*/
     std::string name;
+    /* 玩家分数*/
+    int score = 0;
     /* 正在输入标志*/
     bool typing_flag = false;
     /* HudState对象*/

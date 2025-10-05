@@ -48,6 +48,8 @@ void EndScene::init()
     typing_flag = true;
     /* 获取hud_state*/
     hud_state = get_game().get_hud().get_hudState();
+    /* 获取得分*/
+    score = hud_state.score;
 }
 void EndScene::update()
 {
@@ -105,7 +107,7 @@ void EndScene::handle_event(SDL_Event *event)
                     name = "None";
                 }
                 /* 插入分数排行榜*/
-                insert_rankBoard(hud_state.score, name);
+                insert_rankBoard(score, name);
             }
             if (event->key.keysym.scancode == SDL_SCANCODE_BACKSPACE)
             {
@@ -161,23 +163,32 @@ void EndScene::render_textTyping()
 }
 void EndScene::render_rankBoard()
 {
+    /* 渲染得分榜标题*/
     std::string text = "得分榜";
     SDL_Color color{255, 255, 255, 255};
     get_game().RenderTextCenterW(text, GameManager::NormalFontType::Large, color, 0.1);
-    float height_percent = 0.15;
+    /* 渲染得分榜*/
+    float point_y = 0.2 * get_game().get_height();
     int i = 1;
     for (auto item : rank_board)
     {
-        std::string name = std::to_string(i) + ". " + item.second;
-        std::string score = std::to_string(item.first);
-        std::string text = name + "     " + score;
-        get_game().RenderTextCenterW(text, GameManager::NormalFontType::Small, color, height_percent + i * 0.05);
+        std::string rank_name = std::to_string(i) + ". " + item.second;
+        std::string rank_score = std::to_string(item.first);
+        SDL_Point name_point{100, static_cast<int>(point_y)};
+        SDL_Point score_point{400, static_cast<int>(point_y)};
+        get_game().RenderTextPoint(rank_name, GameManager::NormalFontType::Small, color, name_point);
+        get_game().RenderTextPoint(rank_score, GameManager::NormalFontType::Small, color, score_point);
+        point_y += 45;
         i++;
     }
+    /* 渲染本次得分*/
+    text = "本轮得分: " + std::to_string(score) + " (" + name + ")";
+    get_game().RenderTextCenterW(text, GameManager::NormalFontType::Small, color, 0.72);
+    /* 闪烁渲染重启提示*/
     if (timer < 500)
     {
-        std::string regame_text = "按 J 重新开始游戏!";
-        get_game().RenderTextCenterW(regame_text, GameManager::NormalFontType::Medium, color, 0.8);
+        text = "按 J 重新开始游戏!";
+        get_game().RenderTextCenterW(text, GameManager::NormalFontType::Medium, color, 0.85);
     }
 }
 /**
