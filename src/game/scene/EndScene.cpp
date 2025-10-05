@@ -3,7 +3,9 @@
 #include "HudManager.h"
 #include "HudState.h"
 #include <iostream>
+#include <fstream>
 #define SPACESHOOT_RANK_BOARD_MAX_ITEM 8 /* 排行榜中的最大条目数量*/
+#define SPACESHOOT_RANK_BOARD_FILE_PATH "../assets/rank_board.dat"
 EndScene::EndScene()
 {
 }
@@ -174,5 +176,64 @@ void EndScene::insert_rankBoard(int score, std::string name)
     {
         auto it = std::prev(rank_board.end());
         rank_board.erase(it);
+    }
+}
+/**
+ * @brief: 写入排行榜到文件
+ */
+void EndScene::write_rankFile()
+{
+    std::ofstream rank_file(SPACESHOOT_RANK_BOARD_FILE_PATH);
+    if (!rank_file.is_open())
+    {
+        std::cout << "Write rank board file open failed." << std::endl;
+        return;
+    }
+    for (const auto &item : rank_board)
+    {
+        rank_file << item.first << "," << item.second << std::endl;
+    }
+    rank_file.close();
+}
+/**
+ * @brief: 读取排行榜文件
+ */
+void EndScene::read_rankFile()
+{
+    std::ifstream rank_file(SPACESHOOT_RANK_BOARD_FILE_PATH);
+    if (!rank_file.is_open())
+    {
+        std::cout << "Read rank board file open failed." << std::endl;
+        return;
+    }
+    /* 清空rank_board*/
+    rank_board.clear();
+    std::string line;
+    while (std::getline(rank_file, line))
+    {
+        /* 空行检测*/
+        if (line.empty())
+        {
+            continue;
+        }
+        auto comma = line.find(',');
+        /* 无逗号异常行检测*/
+        if (comma == std::string::npos)
+        {
+            continue;
+        }
+        int score = 0;
+        try
+        {
+            score = std::stoi(line.substr(0, comma));
+        }
+        catch (const std::exception &e)
+        {
+            std::cout << "Invalid score in rank file: " << e.what() << std::endl;
+            continue;
+        }
+        std::string name = line.substr(comma + 1);
+        /* 插入到rank_board*/
+        rank_board.insert({score, name});
     }
 }

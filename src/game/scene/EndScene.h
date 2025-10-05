@@ -23,6 +23,8 @@ private:
     void render_rankBoard();
     void remove_lastUTF8Char(std::string& str);
     void insert_rankBoard(int score, std::string name);
+    void write_rankFile();
+    void read_rankFile();
 public:
     EndScene();
     ~EndScene();
