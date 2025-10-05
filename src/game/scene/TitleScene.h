@@ -1,10 +1,9 @@
 #pragma once
 #include "Scene.h"
 #include "SDL.h"
-#include "SDL_image.h"
-#include "SDL_mixer.h"
-#include "SDL_ttf.h"
 #include "HudState.h"
+#include <memory>
+class HappyHaji;
 class TitleScene : public Scene
 {
 private:
@@ -12,7 +11,8 @@ private:
     HudState hud_state;
     /* 计时器*/
     uint32_t timer = 0;
-
+    /* happy_haji对象*/
+    std::unique_ptr<HappyHaji> happy_haji;
 public:
     TitleScene();
     ~TitleScene();

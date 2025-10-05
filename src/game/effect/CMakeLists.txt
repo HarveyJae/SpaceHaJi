@@ -2,6 +2,7 @@ set(
     EFFECT_SRC
     GameEffect.cpp
     Explosion.cpp
+    HappyHaji.cpp
 )
 
 add_library(

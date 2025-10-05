@@ -50,7 +50,7 @@ void GameManager::init()
     retval = SDL_Init(SDL_INIT_EVERYTHING);
     if (retval != 0)
     {
-        std::cout << "SDL Init failed, error msg: " << SDL_GetError() << std::endl;
+        std::cerr << "SDL Init failed, error msg: " << SDL_GetError() << std::endl;
         running_flag = false;
         return;
     }
@@ -58,7 +58,7 @@ void GameManager::init()
     window = SDL_CreateWindow(SPACESHOOT_WINDOW_TITLE_NAME, 100, 100, width, height, SDL_WINDOW_SHOWN);
     if (!window)
     {
-        std::cout << "SDL Create window failed, error msg: " << SDL_GetError() << std::endl;
+        std::cerr << "SDL Create window failed, error msg: " << SDL_GetError() << std::endl;
         running_flag = false;
         return;
     }
@@ -66,7 +66,7 @@ void GameManager::init()
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!renderer)
     {
-        std::cout << "SDL Create renderer failed, error msg: " << SDL_GetError() << std::endl;
+        std::cerr << "SDL Create renderer failed, error msg: " << SDL_GetError() << std::endl;
         running_flag = false;
         return;
     }
@@ -74,7 +74,7 @@ void GameManager::init()
     retval = SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     if (retval != 0)
     {
-        std::cout << "SDL default color set failed, error msg: " << SDL_GetError() << std::endl;
+        std::cerr << "SDL default color set failed, error msg: " << SDL_GetError() << std::endl;
         running_flag = false;
         return;
     }
@@ -82,7 +82,7 @@ void GameManager::init()
     retval = IMG_Init(SPACESHOOT_IMAGE_FLAG);
     if (retval != SPACESHOOT_IMAGE_FLAG)
     {
-        std::cout << "SDL_image init failed, error msg: " << SDL_GetError() << std::endl;
+        std::cerr << "SDL_image init failed, error msg: " << SDL_GetError() << std::endl;
         running_flag = false;
         return;
     }
@@ -90,7 +90,7 @@ void GameManager::init()
     retval = Mix_Init(SPACESHOOT_MIXER_FLAG);
     if (retval != SPACESHOOT_MIXER_FLAG)
     {
-        std::cout << "SDL_mixer init failed, error msg: " << SDL_GetError() << std::endl;
+        std::cerr << "SDL_mixer init failed, error msg: " << SDL_GetError() << std::endl;
         running_flag = false;
         return;
     }
@@ -98,7 +98,7 @@ void GameManager::init()
     retval = TTF_Init();
     if (retval != 0)
     {
-        std::cout << "SDL_ttf init failed, error msg: " << SDL_GetError() << std::endl;
+        std::cerr << "SDL_ttf init failed, error msg: " << SDL_GetError() << std::endl;
         running_flag = false;
         return;
     }
@@ -106,7 +106,7 @@ void GameManager::init()
     retval = Mix_OpenAudio(SPACESHOOT_MIXER_FREQUENCE, SPACESHOOT_MIXER_FORMAT, 2, SPACESHOOT_MIXER_MAX_VOLUME);
     if (retval < 0)
     {
-        std::cout << "SDL_mixer open failed, error msg: " << SDL_GetError() << std::endl;
+        std::cerr << "SDL_mixer open failed, error msg: " << SDL_GetError() << std::endl;
         running_flag = false;
         return;
     }
@@ -119,21 +119,21 @@ void GameManager::init()
     text_font_small = TTF_OpenFont(SPACESHOOT_NORMAL_TEXT_FONT_PATH, SPACESHOOT_NORMAL_TEXT_FONT_SMALL_SIZE);
     if (!text_font_small)
     {
-        std::cout << "Load small text font failed, error msg: " << SDL_GetError() << std::endl;
+        std::cerr << "Load small text font failed, error msg: " << SDL_GetError() << std::endl;
         running_flag = false;
         return;
     }
     text_font_medium = TTF_OpenFont(SPACESHOOT_NORMAL_TEXT_FONT_PATH, SPACESHOOT_NORMAL_TEXT_FONT_MEDIUM_SIZE);
     if (!text_font_medium)
     {
-        std::cout << "Load medium text font failed, error msg: " << SDL_GetError() << std::endl;
+        std::cerr << "Load medium text font failed, error msg: " << SDL_GetError() << std::endl;
         running_flag = false;
         return;
     }
     text_font_large = TTF_OpenFont(SPACESHOOT_NORMAL_TEXT_FONT_PATH, SPACESHOOT_NORMAL_TEXT_FONT_LARGE_SIZE);
     if (!text_font_large)
     {
-        std::cout << "Load large text font failed, error msg: " << SDL_GetError() << std::endl;
+        std::cerr << "Load large text font failed, error msg: " << SDL_GetError() << std::endl;
         running_flag = false;
         return;
     }
@@ -141,7 +141,7 @@ void GameManager::init()
     SDL_ChangeScene_Event = SDL_RegisterEvents(1);
     if (SDL_ChangeScene_Event == (uint32_t)-1)
     {
-        std::cout << "SDL_Event ChangeScene register failed." << std::endl;
+        std::cerr << "SDL_Event ChangeScene register failed." << std::endl;
         running_flag = false;
         return;
     }
@@ -163,7 +163,7 @@ void GameManager::run()
         {
             if (current_scene == nullptr)
             {
-                std::cout << "Current scene is null, quit game." << std::endl;
+                std::cerr << "Current scene is null, quit game." << std::endl;
                 return;
             }
             SDL_Event event;
@@ -243,7 +243,7 @@ void GameManager::change_sceneDelay(std::unique_ptr<Scene> scene, uint32_t delay
         event.type = SDL_ChangeScene_Event;
         if (SDL_PushEvent(&event) != 1)
         {
-            std::cout << "Scene change event push error." << std::endl;
+            std::cerr << "Scene change event push error." << std::endl;
         }
         return;
     }
@@ -278,7 +278,7 @@ void GameManager::cs_timer_thread_function(uint32_t delay_ms)
     event.type = SDL_ChangeScene_Event;
     if (SDL_PushEvent(&event) < 0)
     {
-        std::cout << "SDL_Event ChangeScene register failed." << std::endl;
+        std::cerr << "SDL_Event ChangeScene register failed." << std::endl;
     }
 }
 void GameManager::change_sceneStop()
