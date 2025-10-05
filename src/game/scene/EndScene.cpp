@@ -27,7 +27,7 @@ void EndScene::init()
     }
     if (!SDL_IsTextInputActive())
     {
-        std::cout << "EndScene text input open failed, error msg: " << SDL_GetError() << std::endl;
+        std::cerr << "EndScene text input open failed, error msg: " << SDL_GetError() << std::endl;
         return;
     }
     /* 初始化定时器*/
@@ -200,7 +200,7 @@ void EndScene::write_rankFile()
     std::ofstream rank_file(SPACESHOOT_RANK_BOARD_FILE_PATH);
     if (!rank_file.is_open())
     {
-        std::cout << "Write rank board file open failed." << std::endl;
+        std::cerr << "Write rank board file open failed." << std::endl;
         return;
     }
     for (const auto &item : rank_board)
@@ -217,7 +217,7 @@ void EndScene::read_rankFile()
     std::ifstream rank_file(SPACESHOOT_RANK_BOARD_FILE_PATH);
     if (!rank_file.is_open())
     {
-        std::cout << "Read rank board file open failed." << std::endl;
+        std::cerr << "Read rank board file open failed." << std::endl;
         return;
     }
     /* 清空rank_board*/
@@ -243,7 +243,7 @@ void EndScene::read_rankFile()
         }
         catch (const std::exception &e)
         {
-            std::cout << "Invalid score in rank file: " << e.what() << std::endl;
+            std::cerr << "Invalid score in rank file: " << e.what() << std::endl;
             continue;
         }
         std::string name = line.substr(comma + 1);

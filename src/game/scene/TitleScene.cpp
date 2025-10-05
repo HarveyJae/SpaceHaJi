@@ -21,7 +21,7 @@ void TitleScene::init()
     get_music() = Mix_LoadMUS(SPACESHOOT_TITLESCENE_MUSIC_PATH);
     if (!get_music())
     {
-        std::cout << "TitleScene music load failed, error msg: " << SDL_GetError() << std::endl;
+        std::cerr << "TitleScene music load failed, error msg: " << SDL_GetError() << std::endl;
         return;
     }
     Mix_PlayMusic(get_music(), -1);

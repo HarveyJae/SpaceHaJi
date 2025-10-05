@@ -43,7 +43,7 @@ void MainScene::init()
     get_music() = Mix_LoadMUS(SPACESHOOT_MAINSCENE_MUSIC_PATH);
     if (!get_music())
     {
-        std::cout << "MainScene music load failed, error msg: " << SDL_GetError() << std::endl;
+        std::cerr << "MainScene music load failed, error msg: " << SDL_GetError() << std::endl;
         return;
     }
     /* 开启背景音乐*/

@@ -107,7 +107,7 @@ void HudManager::init_healthHud()
     health_texture = IMG_LoadTexture(game.get_renderer(), SPACESHOOT_HUD_HEALTH_IMAGE_PATH);
     if (!health_texture)
     {
-        std::cout << "Load health HUD texture failed, error msg: " << SDL_GetError() << std::endl;
+        std::cerr << "Load health HUD texture failed, error msg: " << SDL_GetError() << std::endl;
         return;
     }
     SDL_QueryTexture(health_texture, nullptr, nullptr, &health_width, &health_height);
