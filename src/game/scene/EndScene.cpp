@@ -2,6 +2,7 @@
 #include "GameManager.h"
 #include "HudManager.h"
 #include "HudState.h"
+#include "MainScene.h"
 #include <iostream>
 #include <fstream>
 #define SPACESHOOT_RANK_BOARD_MAX_ITEM 8 /* 排行榜中的最大条目数量*/
@@ -17,6 +18,8 @@ void EndScene::init()
 {
     /* 设置hud类型*/
     get_game().get_hud().set_sceneType(HudManager::HudSceneType::End);
+    /* 读取rank_file*/
+    read_rankFile();
     /* 开启文本输入功能*/
     if (!SDL_IsTextInputActive())
     {
@@ -60,7 +63,8 @@ void EndScene::render()
 }
 void EndScene::clean()
 {
-    /* nothing to do.*/
+    /* 写入rank file*/
+    write_rankFile();
 }
 void EndScene::handle_event(SDL_Event *event)
 {
@@ -95,6 +99,16 @@ void EndScene::handle_event(SDL_Event *event)
     }
     else /* 排行榜*/
     {
+        if (event->type == SDL_KEYDOWN)
+        {
+            if (event->key.keysym.scancode == SDL_SCANCODE_J)
+            {
+                /* 清空hud_state*/
+                hud_state = HudState{};
+                get_game().get_hud().get_hudState() = hud_state;
+                get_game().change_sceneNow(std::make_unique<MainScene>());
+            }
+        }
     }
 }
 void EndScene::render_textTyping()
@@ -236,4 +250,5 @@ void EndScene::read_rankFile()
         /* 插入到rank_board*/
         rank_board.insert({score, name});
     }
+    rank_file.close();
 }
