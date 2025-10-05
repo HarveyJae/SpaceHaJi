@@ -18,7 +18,7 @@
 #define SPACESHOOT_MAINSCENE_MUSIC_PATH "../assets/music/manbobo.mp3"          /* mainscene的背景音乐路径*/
 #define SPACESHOOT_FIGHTER_SHOOT_SOUND_PATH "../assets/sound/laser_shoot4.wav" /* fighter-shoot的音效路径*/
 #define SPACESHOOT_ENEMY_SHOOT_SOUND_PATH "../assets/sound/xs_laser.wav"       /* enemy-shoot的音效路径*/
-#define SPACESHOOT_FIGHTER_EXPLODE_SOUND_PATH "../assets/sound/explosion1.wav" /* fighter-explode的音效路径*/
+#define SPACESHOOT_FIGHTER_EXPLODE_SOUND_PATH "../assets/sound/manbaout.mp3"   /* fighter-explode的音效路径*/
 #define SPACESHOOT_ENEMY_EXPLODE_SOUND_PATH "../assets/sound/ohyeah.mp3"       /* enemy-explode的音效路径*/
 #define SPACESHOOT_HIT_SOUND_PATH "../assets/sound/eff11.wav"                  /* bullet-hit的音效路径*/
 #define SPACESHOOT_FIGHTER_BONUS_SOUND_PATH "../assets/sound/eff5.mp3"         /* fighter-bonus的音效路径*/
@@ -355,12 +355,14 @@ void MainScene::update_bullet()
                         /* 爆炸效果*/
                         if (fighter->get_dead())
                         {
+                            /* 结束场景音乐*/
+                            Mix_HaltMusic();
                             auto explosion = fighter->explode();
                             explosions.push_back(std::move(explosion));
                             auto chunk = get_sounds().at(SPACESHOOT_FIGHTER_EXPLODE_SOUND_KEY);
                             Mix_PlayChannel(-1, chunk, 0);
-                            /* 切换到结束场景(延时2s)*/
-                            get_game().change_sceneDelay(std::make_unique<EndScene>(), 2000);
+                            /* 切换到结束场景(延时7s)*/
+                            get_game().change_sceneDelay(std::make_unique<EndScene>(), 7000);
                         }
                     }
                 }
