@@ -11,6 +11,7 @@
 #include "HudManager.h"
 #include "HudState.h"
 #include "EndScene.h"
+#include "Shield.h"
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -28,10 +29,9 @@
 #define SPACESHOOT_ENEMY_EXPLODE_SOUND_KEY "enemy_explode"                     /* enemy-explode的key值*/
 #define SPACESHOOT_HIT_SOUND_SOUND_KEY "bullet_hit"                            /* bullet-hit的key值*/
 #define SPACESHOOT_FIGHTER_BONUS_SOUND_KEY "fighter_bonus"                     /* fighter-bonus的key值*/
-MainScene::MainScene() : fighter(std::make_unique<Fighter>())
+MainScene::MainScene()
 {
 }
-
 MainScene::~MainScene()
 {
 }
@@ -58,7 +58,9 @@ void MainScene::init()
     get_sounds().insert(std::make_pair(SPACESHOOT_ENEMY_EXPLODE_SOUND_KEY, Mix_LoadWAV(SPACESHOOT_ENEMY_EXPLODE_SOUND_PATH)));
     get_sounds().insert(std::make_pair(SPACESHOOT_HIT_SOUND_SOUND_KEY, Mix_LoadWAV(SPACESHOOT_HIT_SOUND_PATH)));
     get_sounds().insert(std::make_pair(SPACESHOOT_FIGHTER_BONUS_SOUND_KEY, Mix_LoadWAV(SPACESHOOT_FIGHTER_BONUS_SOUND_PATH)));
-    /* 初始化Fighter对象*/
+    /* 创建fighter对象*/
+    fighter = std::make_unique<Fighter>();
+    /* 初始化fighter对象*/
     if (fighter)
     {
         fighter->init();
@@ -80,6 +82,8 @@ void MainScene::update()
     update_item();
     /* 更新explosion*/
     update_explosion();
+    /* 更新shield*/
+    update_shield();
     /* 更新hud_manager*/
     update_hudManager();
 }
@@ -95,6 +99,8 @@ void MainScene::render()
     render_item();
     /* 绘制explosion*/
     render_explosion();
+    /* 绘制shield*/
+    render_shield();
     /* 绘制hud_manager*/
     render_hudManager();
 }
@@ -108,6 +114,8 @@ void MainScene::clean()
     clean_bullet();
     /* 清除item*/
     clean_item();
+    /* 清除shield*/
+    clean_shield();
     /* 清除explosion*/
     clean_explosion();
     /* 清理音效资源*/
@@ -153,6 +161,11 @@ void MainScene::handle_event(SDL_Event *event)
     for (auto &explosion : explosions)
     {
         explosion->handle_event(event);
+    }
+    /* 处理shield事件*/
+    if (shield)
+    {
+        shield->handle_event(event);
     }
     /* 处理hud_manager事件*/
     get_game().get_hud().handle_event(event);
@@ -344,7 +357,8 @@ void MainScene::update_bullet()
                     }
                 }
                 break;
-            case Bullet::BulletType::Enemy:
+            case Bullet::BulletType::HAJI_1:
+            case Bullet::BulletType::MANBO:
                 /* fighter击中检测*/
                 if (fighter)
                 {
@@ -364,6 +378,16 @@ void MainScene::update_bullet()
                             /* 切换到结束场景(延时7s)*/
                             get_game().change_sceneDelay(std::make_unique<EndScene>(), 7000);
                         }
+                    }
+                }
+                /* shield击中检测*/
+                if (shield && fighter)
+                {
+                    if (bullet_collisionDetection((*it).get(), shield.get()))
+                    {
+                        /* todo: 需要增加新的音效(打击盾牌音效)*/
+                        auto hit_chunk = get_sounds().at(SPACESHOOT_HIT_SOUND_SOUND_KEY);
+                        Mix_PlayChannel(-1, hit_chunk, 0);
                     }
                 }
                 break;
@@ -391,6 +415,17 @@ void MainScene::update_item()
                 {
                     /* fighter获取item*/
                     fighter->get_item((*it).get());
+                    /* shield判断*/
+                    if (!shield && (*it)->get_type() == Item::ItemType::Shield)
+                    {
+                        /* 创建shield对象*/
+                        shield = std::make_unique<Shield>();
+                        /* 初始化shield对象*/
+                        if (shield)
+                        {
+                            shield->init();
+                        }
+                    }
                     auto chunk = get_sounds().at(SPACESHOOT_FIGHTER_BONUS_SOUND_KEY);
                     Mix_PlayChannel(-1, chunk, 0);
                 }
@@ -414,6 +449,23 @@ void MainScene::update_explosion()
             (*it)->update();
             it++;
         }
+    }
+}
+void MainScene::update_shield()
+{
+    if (shield && shield->get_dead())
+    {
+        /* 消除shield*/
+        shield->clean();
+        shield.reset();
+        return;
+    }
+    /* 更新shield坐标(跟随fighter,fighter必须存活)*/
+    if (fighter && shield)
+    {
+        shield->get_point().x = fighter->get_point().x - (shield->get_width() / 2 - fighter->get_width() / 2);
+        shield->get_point().y = fighter->get_point().y - shield->get_height();
+        shield->update();
     }
 }
 void MainScene::update_hudManager()
@@ -465,6 +517,14 @@ void MainScene::render_explosion()
         explosion->render();
     }
 }
+void MainScene::render_shield()
+{
+    /* 只有fighter存活的时候才会绘制*/
+    if (fighter && shield)
+    {
+        shield->render();
+    }
+}
 void MainScene::render_hudManager()
 {
     get_game().get_hud().render();
@@ -507,6 +567,14 @@ void MainScene::clean_explosion()
         explosion->clean();
     }
     explosions.clear();
+}
+void MainScene::clean_shield()
+{
+    if (shield)
+    {
+        shield->clean();
+        shield.reset();
+    }
 }
 /**
  * @brief: 子弹击中检测函数

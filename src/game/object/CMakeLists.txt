@@ -6,6 +6,7 @@ set(
     Bullet.cpp
     Item.cpp
     BkScroller.cpp
+    Shield.cpp
 )
 
 add_library(

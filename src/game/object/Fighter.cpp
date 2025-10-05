@@ -115,7 +115,12 @@ void Fighter::get_item(Item *item)
         {
             get_curHealth() = get_health();
         }
-    default:
+        break;
+    case Item::ItemType::Shield:
+        /* nothing to do.*/
+        break;
+    case Item::ItemType::Time:
+        /* nothing to do.*/
         break;
     }
 }

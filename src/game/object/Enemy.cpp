@@ -98,8 +98,21 @@ std::unique_ptr<Bullet> Enemy::shoot_bullet(GameObject *target, uint32_t damage)
     uint32_t now_shootTime = SDL_GetTicks();
     if (now_shootTime - last_shootTime >= cooldown_time)
     {
-        /* 创建一个bullet智能指针*/
-        auto bullet = std::make_unique<Bullet>(Bullet::BulletType::Enemy, this, target);
+        std::unique_ptr<Bullet> bullet;
+        switch (type)
+        {
+        /* 避免编译警告*/
+        case EnemyType::None:
+        case EnemyType::EnemyTypeMax:
+            /* nothing to do*/
+            return nullptr;
+        case EnemyType::HAJI_1:
+            bullet = std::make_unique<Bullet>(Bullet::BulletType::HAJI_1, this, target);
+            break;
+        case EnemyType::MANBO:
+            bullet = std::make_unique<Bullet>(Bullet::BulletType::MANBO, this, target);
+            break;
+        }
         /* 初始化bullet*/
         bullet->init();
         /* 配置bullet伤害*/

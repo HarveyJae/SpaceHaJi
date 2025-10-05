@@ -1,9 +1,9 @@
 #pragma once
 #include "SDL.h"
-#include "SDL_mixer.h"
 #include <cstdint>
 /* 前向声明*/
 class GameManager;
+class Mix_Music;
 class GameEffect
 {
 private:
@@ -34,6 +34,8 @@ private:
     bool finish_flag = false;
     /* 动画开始时间*/
     uint32_t start_time = 0;
+    /* 激活标志*/
+    bool active = false;
 
 public:
     GameEffect();
@@ -60,4 +62,5 @@ public:
     int &get_curFrame() { return current_frame; }
     bool &get_finish() { return finish_flag; }
     uint32_t &get_startTime() { return start_time; }
+    bool &get_active() { return active; }
 };

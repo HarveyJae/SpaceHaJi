@@ -13,7 +13,8 @@ public:
     {
         None = 0,
         Fighter,
-        Enemy,
+        HAJI_1,
+        MANBO,
         BulletTypeMax,
     };
 

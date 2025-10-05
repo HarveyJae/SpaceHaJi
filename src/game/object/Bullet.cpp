@@ -4,9 +4,11 @@
 #include <cmath>
 #include <cstdint>
 #define SPACESHOOT_OBJECT_FIGHTER_BULLET_IMAGE_PATH "../assets/image/haji_bullet_fighter.png" /* fighter_bullet图片路径*/
-#define SPACESHOOT_OBJECT_ENEMY_BULLET_IMAGE_PATH "../assets/image/bullet-1.png"              /* enemy_bullet图片路径*/
+#define SPACESHOOT_OBJECT_HAJI1_BULLET_IMAGE_PATH "../assets/image/bullet-2.png"              /* haji1_bullet图片路径*/
+#define SPACESHOOT_OBJECT_MANBO_BULLET_IMAGE_PATH "../assets/image/bullet-1.png"              /* manbo_bullet图片路径*/
 #define SPACESHOOT_FIGHTER_BULLET_DEFAULT_SPEED 400                                           /* fighter_bullet的速度，400px/s*/
-#define SPACESHOOT_ENEMY_BULLET_DEFAULT_SPEED 200                                             /* enemy_bullet的速度，200px/s*/
+#define SPACESHOOT_HAJI1_BULLET_DEFAULT_SPEED 200                                             /* haji1_bullet的速度，200px/s*/
+#define SPACESHOOT_MANBO_BULLET_DEFAULT_SPEED 150                                             /* manbo_bullet的速度，100px/s*/
 Bullet::Bullet(BulletType type, GameObject *master, GameObject *target) : type(type), master(master), target(target)
 {
 }
@@ -34,10 +36,17 @@ void Bullet::init()
         get_width() = get_width() / 20;
         get_height() = get_height() / 20;
         break;
-    case BulletType::Enemy:
-        get_texture() = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_ENEMY_BULLET_IMAGE_PATH);
+    case BulletType::HAJI_1:
+        get_texture() = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_HAJI1_BULLET_IMAGE_PATH);
         SDL_QueryTexture(get_texture(), nullptr, nullptr, &get_width(), &get_height());
-        get_speed() = SPACESHOOT_ENEMY_BULLET_DEFAULT_SPEED;
+        get_speed() = SPACESHOOT_HAJI1_BULLET_DEFAULT_SPEED;
+        get_width() = get_width() / 2;
+        get_height() = get_height() / 2;
+        break;
+    case BulletType::MANBO:
+        get_texture() = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_MANBO_BULLET_IMAGE_PATH);
+        SDL_QueryTexture(get_texture(), nullptr, nullptr, &get_width(), &get_height());
+        get_speed() = SPACESHOOT_MANBO_BULLET_DEFAULT_SPEED;
         get_width() = get_width() / 2;
         get_height() = get_height() / 2;
         break;
@@ -67,7 +76,8 @@ void Bullet::update()
             get_dead() = true;
         }
         break;
-    case BulletType::Enemy:
+    case BulletType::HAJI_1:
+    case BulletType::MANBO:
         /* 根据速度更新坐标*/
         get_point().y += get_direction().y * get_speed() * get_game().get_speedArg();
         get_point().x += get_direction().x * get_speed() * get_game().get_speedArg();
@@ -95,7 +105,8 @@ void Bullet::render()
         /* 非旋转绘制*/
         SDL_RenderCopy(get_game().get_renderer(), get_texture(), nullptr, &Bullet_rect);
         break;
-    case BulletType::Enemy:
+    case BulletType::HAJI_1:
+    case BulletType::MANBO:
         /* 计算方向角度(x轴为基准)*/
         float angle = std::atan2(get_direction().y, get_direction().x) * 180.0 / M_PI - 90;
         /* 旋转中心*/
@@ -129,7 +140,8 @@ void Bullet::cal_direction()
         get_direction().x = 0.0f;
         get_direction().y = -1.0f;
         break;
-    case BulletType::Enemy:
+    case BulletType::HAJI_1:
+    case BulletType::MANBO:
         if (!master || !target)
         {
             /* 固定方向*/
