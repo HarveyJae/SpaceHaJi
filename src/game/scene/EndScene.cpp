@@ -7,6 +7,7 @@
 #include <fstream>
 #define SPACESHOOT_RANK_BOARD_MAX_ITEM 8 /* 排行榜中的最大条目数量*/
 #define SPACESHOOT_RANK_BOARD_FILE_PATH "../assets/rank_board.dat"
+#define SPACESHOOT_ENDSCENE_MUSIC_PATH "../assets/music/deadjimi.mp3"
 EndScene::EndScene()
 {
 }
@@ -18,6 +19,17 @@ void EndScene::init()
 {
     /* 设置hud类型*/
     get_game().get_hud().set_sceneType(HudManager::HudSceneType::End);
+    /* 清空hud_state*/
+    hud_state = HudState{};
+    get_game().get_hud().get_hudState() = hud_state;
+    /* 初始化音频*/
+    get_music() = Mix_LoadMUS(SPACESHOOT_ENDSCENE_MUSIC_PATH);
+    if (!get_music())
+    {
+        std::cerr << "EndScene music load failed, error msg: " << SDL_GetError() << std::endl;
+        return;
+    }
+    Mix_PlayMusic(get_music(), -1);
     /* 读取rank_file*/
     read_rankFile();
     /* 开启文本输入功能*/
@@ -65,6 +77,13 @@ void EndScene::clean()
 {
     /* 写入rank file*/
     write_rankFile();
+    /* 清理音频资源*/
+    if (get_music() != nullptr)
+    {
+        Mix_HaltMusic();
+        Mix_FreeMusic(get_music());
+        get_music() = nullptr;
+    }
 }
 void EndScene::handle_event(SDL_Event *event)
 {
@@ -103,9 +122,6 @@ void EndScene::handle_event(SDL_Event *event)
         {
             if (event->key.keysym.scancode == SDL_SCANCODE_J)
             {
-                /* 清空hud_state*/
-                hud_state = HudState{};
-                get_game().get_hud().get_hudState() = hud_state;
                 get_game().change_sceneNow(std::make_unique<MainScene>());
             }
         }

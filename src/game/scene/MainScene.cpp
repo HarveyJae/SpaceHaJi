@@ -39,6 +39,9 @@ void MainScene::init()
 {
     /* 设置hud场景类型*/
     get_game().get_hud().set_sceneType(HudManager::HudSceneType::Main);
+    /* 清空hud_state*/
+    hud_state = HudState{};
+    get_game().get_hud().get_hudState() = hud_state;
     /* 加载背景音乐*/
     get_music() = Mix_LoadMUS(SPACESHOOT_MAINSCENE_MUSIC_PATH);
     if (!get_music())

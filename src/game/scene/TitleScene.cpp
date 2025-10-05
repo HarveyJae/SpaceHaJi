@@ -6,7 +6,7 @@
 #include "HudState.h"
 #include "MainScene.h"
 #include <iostream>
-#define SPACESHOOT_TITLESCENE_MUSIC_PATH "../assets/music/deadjimi.mp3"                    /* titlescene的背景音乐路径*/
+#define SPACESHOOT_TITLESCENE_MUSIC_PATH "../assets/music/skijimi.mp3" /* titlescene的背景音乐路径*/
 TitleScene::TitleScene()
 {
 }
@@ -17,6 +17,9 @@ TitleScene::~TitleScene()
 void TitleScene::init()
 {
     get_game().get_hud().set_sceneType(HudManager::HudSceneType::Title);
+    /* 清空hud_state*/
+    hud_state = HudState{};
+    get_game().get_hud().get_hudState() = hud_state;
     /* 初始化音频*/
     get_music() = Mix_LoadMUS(SPACESHOOT_TITLESCENE_MUSIC_PATH);
     if (!get_music())
@@ -57,7 +60,13 @@ void TitleScene::render()
 }
 void TitleScene::clean()
 {
-    /* nothing to do*/
+    /* 清理音频资源*/
+    if (get_music() != nullptr)
+    {
+        Mix_HaltMusic();
+        Mix_FreeMusic(get_music());
+        get_music() = nullptr;
+    }
 }
 void TitleScene::handle_event(SDL_Event *event)
 {
