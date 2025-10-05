@@ -55,7 +55,7 @@ void GameManager::init()
         return;
     }
     /* 创建窗口*/
-    window = SDL_CreateWindow(SPACESHOOT_WINDOW_TITLE_NAME, 100, 100, width, height, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow(SPACESHOOT_WINDOW_TITLE_NAME, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN);
     if (!window)
     {
         std::cerr << "SDL Create window failed, error msg: " << SDL_GetError() << std::endl;
@@ -67,6 +67,14 @@ void GameManager::init()
     if (!renderer)
     {
         std::cerr << "SDL Create renderer failed, error msg: " << SDL_GetError() << std::endl;
+        running_flag = false;
+        return;
+    }
+    /* 设定逻辑渲染尺寸，窗口缩放时自动按基础分辨率拉伸 */
+    retval = SDL_RenderSetLogicalSize(renderer, width, height);
+    if (retval != 0)
+    {
+        std::cerr << "SDL logical size set failed, error msg: " << SDL_GetError() << std::endl;
         running_flag = false;
         return;
     }
@@ -362,6 +370,18 @@ void GameManager::handle_event(SDL_Event *event)
             if (next_scene)
             {
                 change_sceneNow(std::move(next_scene));
+            }
+        }
+        /* 处理按键事件*/
+        if (event->type == SDL_KEYDOWN)
+        {
+            /* 修饰键alt*/
+            const bool hold_alt = (event->key.keysym.mod & KMOD_ALT) != 0;
+            /* alt + Enter*/
+            if (hold_alt && event->key.keysym.sym == SDLK_RETURN)
+            {
+                fullScreen_flag = !fullScreen_flag;
+                SDL_SetWindowFullscreen(window, fullScreen_flag ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
             }
         }
         /* 处理场景事件*/

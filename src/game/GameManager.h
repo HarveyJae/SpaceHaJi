@@ -38,6 +38,7 @@ private:
     int fps = 0;                               /* 游戏帧率(帧/s)*/
     uint32_t frame_time = 0;                   /* 帧时间(ms/帧)*/
     float speed_arg = 0.0;                     /* 速度参数*/
+    bool fullScreen_flag = false;              /* 全屏标志*/
     bool running_flag = false;                 /* 游戏运行标志*/
     std::unique_ptr<Scene> current_scene;      /* 当前活动场景*/
     int width = 0;                             /* 窗口宽度*/
