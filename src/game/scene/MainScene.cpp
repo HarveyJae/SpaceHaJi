@@ -23,12 +23,14 @@
 #define SPACESHOOT_ENEMY_EXPLODE_SOUND_PATH "../assets/sound/ohyeah.mp3"       /* enemy-explode的音效路径*/
 #define SPACESHOOT_HIT_SOUND_PATH "../assets/sound/eff11.wav"                  /* bullet-hit的音效路径*/
 #define SPACESHOOT_FIGHTER_BONUS_SOUND_PATH "../assets/sound/eff5.mp3"         /* fighter-bonus的音效路径*/
+#define SPACESHOOT_SHIELD_SOUND_PATH "../assets/sound/shield.wav"              /* shield的音效路径*/
 #define SPACESHOOT_FIGHTER_SHOOT_SOUND_KEY "fighter_shoot"                     /* fighter-shoot的key值*/
 #define SPACESHOOT_ENEMY_SHOOT_SOUND_KEY "enemy_shoot"                         /* enemy-shoot的key值*/
 #define SPACESHOOT_FIGHTER_EXPLODE_SOUND_KEY "fighter_explode"                 /* fighter-explode的key值*/
 #define SPACESHOOT_ENEMY_EXPLODE_SOUND_KEY "enemy_explode"                     /* enemy-explode的key值*/
 #define SPACESHOOT_HIT_SOUND_SOUND_KEY "bullet_hit"                            /* bullet-hit的key值*/
 #define SPACESHOOT_FIGHTER_BONUS_SOUND_KEY "fighter_bonus"                     /* fighter-bonus的key值*/
+#define SPACESHOOT_SHIELD_SOUND_KEY "shield"                                   /* shield的key值*/
 MainScene::MainScene()
 {
 }
@@ -58,6 +60,7 @@ void MainScene::init()
     get_sounds().insert(std::make_pair(SPACESHOOT_ENEMY_EXPLODE_SOUND_KEY, Mix_LoadWAV(SPACESHOOT_ENEMY_EXPLODE_SOUND_PATH)));
     get_sounds().insert(std::make_pair(SPACESHOOT_HIT_SOUND_SOUND_KEY, Mix_LoadWAV(SPACESHOOT_HIT_SOUND_PATH)));
     get_sounds().insert(std::make_pair(SPACESHOOT_FIGHTER_BONUS_SOUND_KEY, Mix_LoadWAV(SPACESHOOT_FIGHTER_BONUS_SOUND_PATH)));
+    get_sounds().insert(std::make_pair(SPACESHOOT_SHIELD_SOUND_KEY, Mix_LoadWAV(SPACESHOOT_SHIELD_SOUND_PATH)));
     /* 创建fighter对象*/
     fighter = std::make_unique<Fighter>();
     /* 初始化fighter对象*/
@@ -385,8 +388,7 @@ void MainScene::update_bullet()
                 {
                     if (bullet_collisionDetection((*it).get(), shield.get()))
                     {
-                        /* todo: 需要增加新的音效(打击盾牌音效)*/
-                        auto hit_chunk = get_sounds().at(SPACESHOOT_HIT_SOUND_SOUND_KEY);
+                        auto hit_chunk = get_sounds().at(SPACESHOOT_SHIELD_SOUND_KEY);
                         Mix_PlayChannel(-1, hit_chunk, 0);
                     }
                 }
@@ -415,7 +417,7 @@ void MainScene::update_item()
                 {
                     /* fighter获取item*/
                     fighter->get_item((*it).get());
-                    /* shield判断*/
+                    /* 判断是否创建shield*/
                     if (!shield && (*it)->get_type() == Item::ItemType::Shield)
                     {
                         /* 创建shield对象*/
