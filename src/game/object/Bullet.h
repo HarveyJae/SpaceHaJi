@@ -13,6 +13,7 @@ public:
     {
         None = 0,
         Fighter,
+        FIGHTER_ROCKET,
         HAJI_1,
         MANBO,
         BulletTypeMax,

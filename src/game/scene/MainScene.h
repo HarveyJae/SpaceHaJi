@@ -11,6 +11,7 @@ class Bullet;
 class Explosion;
 class Item;
 class Shield;
+class Thruster;
 class MainScene : public Scene
 {
 private:
@@ -26,6 +27,8 @@ private:
     std::vector<std::unique_ptr<Explosion>> explosions;
     /* shield对象*/
     std::unique_ptr<Shield> shield;
+    /* thruster对象*/
+    std::unique_ptr<Thruster> thruster;
     /* HudState对象*/
     HudState hud_state;
     /* 场景键盘控制*/
@@ -39,6 +42,7 @@ private:
     void update_item();
     void update_explosion();
     void update_shield();
+    void update_thruster();
     void update_hudManager();
     /* 绘制*/
     void render_fighter();
@@ -47,6 +51,7 @@ private:
     void render_item();
     void render_explosion();
     void render_shield();
+    void render_thruster();
     void render_hudManager();
     /* 清除*/
     void clean_fighter();
@@ -55,6 +60,7 @@ private:
     void clean_item();
     void clean_explosion();
     void clean_shield();
+    void clean_thruster();
     /* 辅助函数*/
     bool bullet_collisionDetection(Bullet *bullet, GameObject *obj);
     bool item_collisionDetection(Item *bullet, GameObject *obj);

@@ -84,6 +84,32 @@ std::unique_ptr<Bullet> Fighter::shoot_bullet(GameObject *target, uint32_t damag
     }
     return nullptr;
 }
+std::unique_ptr<Bullet> Fighter::shoot_rocket(GameObject *target, uint32_t damage)
+{
+    /* 无伤害 == 不发射*/
+    if (damage == 0)
+    {
+        return nullptr;
+    }
+    uint32_t now_shootTime = SDL_GetTicks();
+    if (now_shootTime - last_shootTime >= cooldown_time)
+    {
+        /* 创建一个rocket智能指针*/
+        auto rocket = std::make_unique<Bullet>(Bullet::BulletType::FIGHTER_ROCKET, this, target);
+        /* 初始化rocket*/
+        rocket->init();
+        /* 配置rocket伤害*/
+        rocket->get_damage() = damage + 5;
+        /* 定位子弹的初始坐标(fighter上面)*/
+        rocket->get_point().x = get_point().x + get_width() / 2 - rocket->get_width() / 2;
+        rocket->get_point().y = get_point().y;
+        /* 更新时间*/
+        last_shootTime = now_shootTime;
+        /* 添加到bullet数组中*/
+        return rocket;
+    }
+    return nullptr;
+}
 std::unique_ptr<Explosion> Fighter::explode()
 {
     /* 创建爆炸效果*/

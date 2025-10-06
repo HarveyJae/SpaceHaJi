@@ -12,10 +12,12 @@
 #include "HudState.h"
 #include "EndScene.h"
 #include "Shield.h"
+#include "Thruster.h"
 #include <iostream>
 #include <memory>
 #include <vector>
 #include <random>
+#include <cstdlib>
 #define SPACESHOOT_MAINSCENE_MUSIC_PATH "../assets/music/manbobo.mp3"          /* mainscene的背景音乐路径*/
 #define SPACESHOOT_FIGHTER_SHOOT_SOUND_PATH "../assets/sound/laser_shoot4.wav" /* fighter-shoot的音效路径*/
 #define SPACESHOOT_ENEMY_SHOOT_SOUND_PATH "../assets/sound/xs_laser.wav"       /* enemy-shoot的音效路径*/
@@ -87,6 +89,8 @@ void MainScene::update()
     update_explosion();
     /* 更新shield*/
     update_shield();
+    /* 更新thruster*/
+    update_thruster();
     /* 更新hud_manager*/
     update_hudManager();
 }
@@ -104,6 +108,8 @@ void MainScene::render()
     render_explosion();
     /* 绘制shield*/
     render_shield();
+    /* 绘制thruster*/
+    render_thruster();
     /* 绘制hud_manager*/
     render_hudManager();
 }
@@ -117,10 +123,12 @@ void MainScene::clean()
     clean_bullet();
     /* 清除item*/
     clean_item();
-    /* 清除shield*/
-    clean_shield();
     /* 清除explosion*/
     clean_explosion();
+    /* 清除shield*/
+    clean_shield();
+    /* 清除thruster*/
+    clean_thruster();
     /* 清理音效资源*/
     for (auto &sound : get_sounds())
     {
@@ -169,6 +177,11 @@ void MainScene::handle_event(SDL_Event *event)
     if (shield)
     {
         shield->handle_event(event);
+    }
+    /* 处理thruster事件*/
+    if (thruster)
+    {
+        thruster->handle_event(event);
     }
     /* 处理hud_manager事件*/
     get_game().get_hud().handle_event(event);
@@ -222,7 +235,17 @@ void MainScene::keyboard_ctrl()
         if (keyboard_state[SDL_SCANCODE_SPACE])
         {
             /* fighter射击bullet(参数固定是nullptr)*/
-            auto bullet = fighter->shoot_bullet(nullptr, fighter->get_damage());
+            std::unique_ptr<Bullet> bullet;
+            if (thruster)
+            {
+                /* thruster存在，则发射火箭*/
+                bullet = fighter->shoot_rocket(nullptr, fighter->get_damage());
+            }
+            else
+            {
+                /* thruster不存在，发射普通子弹*/
+                bullet = fighter->shoot_bullet(nullptr, fighter->get_damage());
+            }
             if (bullet != nullptr)
             {
                 bullets.push_back(std::move(bullet));
@@ -330,6 +353,7 @@ void MainScene::update_bullet()
                 /* nothing to do*/
                 break;
             case Bullet::BulletType::Fighter:
+            case Bullet::BulletType::FIGHTER_ROCKET:
                 /* enemy击中检测*/
                 for (auto &enemy : enemys)
                 {
@@ -392,6 +416,16 @@ void MainScene::update_bullet()
                         Mix_PlayChannel(-1, hit_chunk, 0);
                     }
                 }
+                /* thruster击中检测*/
+                if (thruster && fighter)
+                {
+                    if (bullet_collisionDetection((*it).get(), thruster.get()))
+                    {
+                        /* todo: 更新thruster音效*/
+                        auto hit_chunk = get_sounds().at(SPACESHOOT_SHIELD_SOUND_KEY);
+                        Mix_PlayChannel(-1, hit_chunk, 0);
+                    }
+                }
                 break;
             }
             (*it)->update();
@@ -418,7 +452,7 @@ void MainScene::update_item()
                     /* fighter获取item*/
                     fighter->get_item((*it).get());
                     /* 判断是否创建shield*/
-                    if (!shield && (*it)->get_type() == Item::ItemType::Shield)
+                    if ((*it)->get_type() == Item::ItemType::Shield && !shield)
                     {
                         /* 创建shield对象*/
                         shield = std::make_unique<Shield>();
@@ -426,6 +460,17 @@ void MainScene::update_item()
                         if (shield)
                         {
                             shield->init();
+                        }
+                    }
+                    /* 判断是否创建thruster*/
+                    else if ((*it)->get_type() == Item::ItemType::Time && !thruster)
+                    {
+                        /* 创建thruster对象*/
+                        thruster = std::make_unique<Thruster>();
+                        /* 初始化shield对象*/
+                        if (thruster)
+                        {
+                            thruster->init();
                         }
                     }
                     auto chunk = get_sounds().at(SPACESHOOT_FIGHTER_BONUS_SOUND_KEY);
@@ -465,9 +510,26 @@ void MainScene::update_shield()
     /* 更新shield坐标(跟随fighter,fighter必须存活)*/
     if (fighter && shield)
     {
-        shield->get_point().x = fighter->get_point().x - (shield->get_width() / 2 - fighter->get_width() / 2);
+        shield->get_point().x = fighter->get_point().x - std::abs((shield->get_width() / 2 - fighter->get_width() / 2));
         shield->get_point().y = fighter->get_point().y - shield->get_height();
         shield->update();
+    }
+}
+void MainScene::update_thruster()
+{
+    if (thruster && thruster->get_dead())
+    {
+        /* 消除thruster*/
+        thruster->clean();
+        thruster.reset();
+        return;
+    }
+    /* 更新thruster坐标(跟随fighter,fighter必须存活)*/
+    if (fighter && thruster)
+    {
+        thruster->get_point().x = fighter->get_point().x + std::abs((thruster->get_width() / 2 - fighter->get_width() / 2));
+        thruster->get_point().y = fighter->get_point().y + fighter->get_height();
+        thruster->update();
     }
 }
 void MainScene::update_hudManager()
@@ -527,6 +589,14 @@ void MainScene::render_shield()
         shield->render();
     }
 }
+void MainScene::render_thruster()
+{
+    /* 只有fighter存活的时候才会绘制*/
+    if (fighter && thruster)
+    {
+        thruster->render();
+    }
+}
 void MainScene::render_hudManager()
 {
     get_game().get_hud().render();
@@ -576,6 +646,14 @@ void MainScene::clean_shield()
     {
         shield->clean();
         shield.reset();
+    }
+}
+void MainScene::clean_thruster()
+{
+    if (thruster)
+    {
+        thruster->clean();
+        thruster.reset();
     }
 }
 /**

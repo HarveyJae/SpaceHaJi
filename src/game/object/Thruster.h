@@ -1,14 +1,15 @@
 #pragma once
 #include "GameObject.h"
 #include <cstdint>
-class Shield : public GameObject
+class Thruster : public GameObject
 {
 private:
-    /* shield计时器*/
+    /* Thruster计时器*/
     uint32_t timer = 0;
+
 public:
-    Shield();
-    ~Shield();
+    Thruster();
+    ~Thruster();
     void init() override;
     void update() override;
     void render() override;

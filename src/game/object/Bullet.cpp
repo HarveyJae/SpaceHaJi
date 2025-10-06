@@ -4,9 +4,11 @@
 #include <cmath>
 #include <cstdint>
 #define SPACESHOOT_OBJECT_FIGHTER_BULLET_IMAGE_PATH "../assets/image/haji_bullet_fighter.png" /* fighter_bullet图片路径*/
+#define SPACESHOOT_OBJECT_FIGHTER_ROCKET_IMAGE_PATH "../assets/image/rocket.png"              /* fighter_rocket图片路径*/
 #define SPACESHOOT_OBJECT_HAJI1_BULLET_IMAGE_PATH "../assets/image/bullet-2.png"              /* haji1_bullet图片路径*/
 #define SPACESHOOT_OBJECT_MANBO_BULLET_IMAGE_PATH "../assets/image/bullet-1.png"              /* manbo_bullet图片路径*/
 #define SPACESHOOT_FIGHTER_BULLET_DEFAULT_SPEED 400                                           /* fighter_bullet的速度，400px/s*/
+#define SPACESHOOT_FIGHTER_ROCKET_DEFAULT_SPEED 400                                           /* fighter_rocket的速度，400px/s*/
 #define SPACESHOOT_HAJI1_BULLET_DEFAULT_SPEED 200                                             /* haji1_bullet的速度，200px/s*/
 #define SPACESHOOT_MANBO_BULLET_DEFAULT_SPEED 150                                             /* manbo_bullet的速度，100px/s*/
 Bullet::Bullet(BulletType type, GameObject *master, GameObject *target) : type(type), master(master), target(target)
@@ -35,6 +37,13 @@ void Bullet::init()
         get_speed() = SPACESHOOT_FIGHTER_BULLET_DEFAULT_SPEED;
         get_width() = get_width() / 20;
         get_height() = get_height() / 20;
+        break;
+    case BulletType::FIGHTER_ROCKET:
+        get_texture() = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_FIGHTER_ROCKET_IMAGE_PATH);
+        SDL_QueryTexture(get_texture(), nullptr, nullptr, &get_width(), &get_height());
+        get_speed() = SPACESHOOT_FIGHTER_ROCKET_DEFAULT_SPEED;
+        get_width() = get_width() / 2;
+        get_height() = get_height() / 2;
         break;
     case BulletType::HAJI_1:
         get_texture() = IMG_LoadTexture(get_game().get_renderer(), SPACESHOOT_OBJECT_HAJI1_BULLET_IMAGE_PATH);
@@ -67,6 +76,7 @@ void Bullet::update()
         /* nothing to do*/
         break;
     case BulletType::Fighter:
+    case BulletType::FIGHTER_ROCKET:
         /* 根据速度更新坐标(不需要更新x)*/
         get_point().y += get_direction().y * get_speed() * get_game().get_speedArg();
         /* 边界判断*/
@@ -102,6 +112,7 @@ void Bullet::render()
         /* nothing to do*/
         break;
     case BulletType::Fighter:
+    case BulletType::FIGHTER_ROCKET:
         /* 非旋转绘制*/
         SDL_RenderCopy(get_game().get_renderer(), get_texture(), nullptr, &Bullet_rect);
         break;
@@ -136,6 +147,7 @@ void Bullet::cal_direction()
         /* nothing to do*/
         break;
     case BulletType::Fighter:
+    case BulletType::FIGHTER_ROCKET:
         /* 固定方向*/
         get_direction().x = 0.0f;
         get_direction().y = -1.0f;
