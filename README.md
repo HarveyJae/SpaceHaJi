@@ -6,8 +6,7 @@
 
 <p align="center">
 	<img alt="haji-typing" 
-       src="https://readme-typing-svg.demolab.com?font=Fira+Code&pause=1000&color=CD72B4AC&width=435&lines=Hello%2C+try+SpaceHaJi."
-       style="position:relative; left:90px;"/>
+       src="https://readme-typing-svg.demolab.com?font=Fira+Code&pause=1000&color=CD72B4AC&width=435&lines=Hello%2C+try+SpaceHaJi."/>
 </p>
 
 <p align="center">
@@ -35,9 +34,7 @@
 ## 画面展示
 
 <p align="center">
-  <img alt="TitleScene" src="assets/readme/TitleScene.gif">
   <img alt="MainScene" src="assets/readme/MainScene.gif">
-  <img alt="EndScene" src="assets/readme/EndScene.gif">
 </p>
 
 
@@ -75,7 +72,10 @@
 
 <p align="center">
   <a href="https://github.com/WispSnow">
-    <img src="https://github.com/WispSnow.png" width="80" height="80" style="border-radius:50%;" alt="Harvey Jae"/>
+    <img src="https://github.com/WispSnow.png?size=200"
+         alt="WispSnow"
+         width="120"
+         style="border-radius:50%; border:2px solid #ccc; margin:5px;">
   </a>
 </p>
 
