@@ -12,7 +12,7 @@
 #define SPACESHOOT_DEFAULT_FPS 60                                                /* 游戏默认帧率*/
 #define SPACESHOOT_WINDOW_WIDTH_PX 600                                           /* 游戏窗口宽度*/
 #define SPACESHOOT_WINDOW_HEIGHT_PX 800                                          /* 游戏窗口高度*/
-#define SPACESHOOT_WINDOW_TITLE_NAME "spaceshoot"                                /* 游戏窗口名称*/
+#define SPACESHOOT_WINDOW_TITLE_NAME "SpaceHaJi"                                 /* 游戏窗口名称*/
 #define SPACESHOOT_IMAGE_FLAG (IMG_INIT_JPG | IMG_INIT_PNG)                      /* 游戏支持的图片格式*/
 #define SPACESHOOT_MIXER_FLAG (MIX_INIT_MP3 | MIX_INIT_OGG)                      /* 游戏支持的音频格式*/
 #define SPACESHOOT_MIXER_FREQUENCE MIX_DEFAULT_FREQUENCY                         /* 游戏的音频默认频率*/
