@@ -1,13 +1,11 @@
 # SpaceHaJi
 
-<p align="center">
-  <img alt="SpaceHaji" src="assets/readme/space_haji_logo.png" width="350" height="350">
-</p>
-
-<p align="center">
-	<img alt="haji-typing" 
-       src="https://readme-typing-svg.demolab.com?font=Fira+Code&pause=1000&color=CD72B4AC&width=435&lines=Hello%2C+try+SpaceHaJi."/>
-</p>
+<div align="center">
+  <img src="assets/readme/space_haji_logo.png" alt="SpaceHaji Logo" width="320">
+  <br><br>
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&pause=1000&color=CD72B4AC&width=400&lines=Hello%2C+try+SpaceHaJi."
+       alt="Typing Animation" width="300">
+</div>
 
 <p align="center">
   <a href="https://en.cppreference.com/w/cpp/17.html">
