@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10.0)
-project(SpaceShoot VERSION 0.1 LANGUAGES C CXX)
+project(SpaceHaJi VERSION 0.1 LANGUAGES C CXX)
 
 # 设置C++标准
 set(CMAKE_CXX_STANDARD 17)

@@ -19,9 +19,6 @@ void EndScene::init()
 {
     /* 设置hud类型*/
     get_game().get_hud().set_sceneType(HudManager::HudSceneType::End);
-    /* 清空hud_state*/
-    hud_state = HudState{};
-    get_game().get_hud().get_hudState() = hud_state;
     /* 初始化音频*/
     get_music() = Mix_LoadMUS(SPACESHOOT_ENDSCENE_MUSIC_PATH);
     if (!get_music())
